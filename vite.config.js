@@ -10,7 +10,8 @@ export default defineConfig(({ command, mode }) => {
   // 使用加载的环境变量进行配置  
   return {  
     // ... 其他配置项  
-    base: env.VITE_BASE_URL, // 设置 publicPath 
+    // base: env.VITE_BASE_URL, // 设置 publicPath 
+    base:'/',
     plugins: [vue()],
     // vite2.x
     css: {
