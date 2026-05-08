@@ -2,7 +2,7 @@
 
     //global init
 
-    import { h, ref, onMounted,getCurrentInstance } from "vue"
+    import { h, ref, onMounted,getCurrentInstance, nextTick  } from "vue"
     const { proxy } = getCurrentInstance()
     import { useRouter } from 'vue-router';
     const router = useRouter();
@@ -175,6 +175,7 @@
       updateDatetime:null,
       modalId:null
     })
+
     //更新模型自建
     const updateModal = () => {
       showUpdateModal.value = true
@@ -618,7 +619,7 @@
               <n-input v-model:value="agentModelForm.botId" type="text" placeholder="请输入botId" />
             </n-form-item>
             <n-form-item label="资源点消耗" path="quantity">
-              <n-slider v-model:value="agentModelForm.quantity" :step="1"/>
+              <n-slider show-tooltip v-model:value="agentModelForm.quantity" :step="1"/>
             </n-form-item>
           
           </n-form>
@@ -646,7 +647,7 @@
       aria-modal="true"
     >
       <template #header-extra>
-        <n-icon size="25px" @click="showRtcModal = false">
+        <n-icon size="25px" @click="showRtcModal=false;">
           <CloseOne/>
         </n-icon>
       </template>
@@ -658,8 +659,8 @@
           maxWidth: '580px',
         }"
       >
-        <n-form-item label="RTC资源点消耗" path="quantity">
-          <n-slider v-model:value="rtcModelForm.quantity" :step="1"/>
+        <n-form-item :label="`RTC资源点消耗「${rtcModelForm.quantity}」`" path="quantity">
+            <n-slider :tooltip="false" v-model:value="rtcModelForm.quantity" :step="1"/>
         </n-form-item>
       
       </n-form>
@@ -709,7 +710,7 @@
       
       </n-form>
       <template #footer>
-        <n-flex justify="space-around" size="large">
+        <n-flex justify="end" size="large">
           <n-button @click="showUpdateModal = false">取消</n-button>
           <n-button type="primary" @click="modalSubmit('keep')">保存</n-button>
           <n-button type="info" @click="modalSubmit('update')">保存并更新</n-button>
@@ -784,12 +785,11 @@
 
 .pagination-container {
   display: flex;
-  justify-content: center;
+  justify-content: right;
   margin-top: auto;
   padding-top: 24px;
   border-top: 1px solid #e5e7eb;
 }
-
 </style>
 
 
