@@ -1,0 +1,28 @@
+/* src/assets/main.css */
+body,code {
+    font-family: 'Kanit', sans-serif;
+    font-weight: 500;
+}
+  
+/* 你可以为不同的元素设置不同的字重 */
+h1, h2, h3 {
+    font-weight: 700; /* 粗体 */
+}
+  
+p {
+    font-weight: 500; /* 细体 */
+}
+
+.toolbar {
+    box-sizing: border-box;
+    padding: 10px;
+    border: 1px solid rgba(129, 216, 208, 0.3); /* 浅灰色边框 */
+    box-shadow: 0 2px 4px rgba(129, 216, 208, 0.2); /* 淡蓝色的悬浮阴影 */
+    border-radius: 5px; /* 5px的圆角 */
+}
+.n-input-group {
+    width: 400px;
+}
+
+/* 普通文本使用默认的 400 字重 */
+

@@ -1,0 +1,795 @@
+<script setup>
+
+    //global init
+
+    import { h, ref, onMounted,getCurrentInstance } from "vue"
+    const { proxy } = getCurrentInstance()
+    import { useRouter } from 'vue-router';
+    const router = useRouter();
+    import { useAxios } from '../../services/axios.js'
+    const axiosService = useAxios();
+    
+    import { 
+        NPageHeader,
+        NGrid,
+        NGi,
+        NStatistic,
+        NAvatar,
+        NAlert,
+        NIcon,
+        NBadge,
+        NDataTable,
+        NButton,
+        NDropdown,
+        NTabs,
+        NTabPane,
+        NTag,
+        NNumberAnimation,
+        NSelect,
+        useDialog,
+        NModal,
+    } from "naive-ui"
+
+    import { 
+        AddOne,
+        Refresh,
+        Setting,
+        Sync,
+        More,
+        CloseOne,
+        Play,
+     } from "@icon-park/vue-next"
+
+    const renderIcon = (icon) => {
+        return () => h(NIcon, null, {default:()=>h(icon)});
+    }
+
+    // 弹窗实例
+    const dialog = useDialog()
+
+
+    // 筛选选项
+    const filterValue = ref('official')
+    const filterOptions = [
+        { label: '全部', value: 'all' },
+        { label: '自建', value: 'custom' },
+        { label: '官方', value: 'official' }
+    ]
+    // 筛选下拉切换事件
+    const handleFilterChange = (value) => {
+        filterValue.value = value
+        // 在这里写筛选逻辑：调用接口 / 过滤本地数据
+        if (value === 'all') {
+            console.log('展示全部 Agent')
+        } else if (value === 'custom') {
+            console.log('只展示 自建 Agent')
+        } else if (value === 'official') {
+            console.log('只展示 官方 Agent')
+        }
+        // 切换筛选后可以重置分页
+        currentPage.value = 1
+    }
+
+    // 卡片菜单选项
+    const getCardMenuOptions = (type) => {
+        if (type === 'custom') {
+            // 自建 → 只显示 删除
+            return [{ label: '删除', key: 'delete' }]
+        } else {
+            // 官方 → 显示 编辑 + 删除
+            return [
+                { label: '编辑', key: 'edit' },
+                { label: '删除', key: 'delete' }
+            ]
+        }
+    }
+
+    // 分页数据
+    const currentPage = ref(1)
+    const pageSize = ref(10)
+    const totalPages = ref(16)
+
+    // 处理下拉菜单点击
+    const handleMenuSelect = (key) => {
+        if (key === 'delete') {
+            // 删除：弹出二次确认框
+            dialog.warning({
+                title: '确认删除',
+                content: '确定要删除该 Agent 吗？删除后无法恢复！',
+                positiveText: '确认删除',
+                negativeText: '取消',
+                onPositiveClick: () => {
+                    // 在这里写真正的删除逻辑（接口请求）
+                    console.log('执行删除操作')
+                },
+                onNegativeClick: () => {
+                    console.log('取消删除')
+                }
+            })
+        } else if (key === 'edit') {
+            console.log('编辑')
+            // 编辑逻辑
+            showAgentModal.value = true
+            agentModalTitle.value = '编辑'
+        }
+    }
+
+    // 当前页发生改变时
+    const onUpdatePage = (page) => {
+        console.log(page)
+    }
+
+    const showAgentModal = ref(false)
+    const agentModalTitle = ref('')
+    const agentModelForm = ref({
+      voiceId:null,
+      speed:null,
+      fileOrText:true,
+      openAudioUrl:null,
+      isRoleStory:true,
+      quantity:40,
+      name:null,
+      digest:null,
+      botId:null,
+    })
+
+
+    const avatarList = ref([])
+    const rtcAvatarList = ref([])
+    const backgroundList = ref([])
+    const openAudioUrlList = ref([])
+    const welcomeAudioUrlList = ref([])
+
+    // 新建agent
+    const createAgent = () => {
+      showAgentModal.value=true;
+      agentModalTitle.value='新建';
+      agentModelForm.value.voiceId = null;
+      agentModelForm.value.speed = null;
+      agentModelForm.value.fileOrText = true;
+      agentModelForm.value.openAudioUrl = null;
+      agentModelForm.value.isRoleStory = true;
+      agentModelForm.value.quantity = 40;
+      agentModelForm.value.name = null;
+      agentModelForm.value.digest = null;
+      agentModelForm.value.botId = null;
+      avatarList.value = []
+      rtcAvatarList.value = []
+      backgroundList.value = []
+      openAudioUrlList.value = []
+      welcomeAudioUrlList.value = []
+    }
+
+    const showRtcModal = ref(false)
+    const rtcModelForm = ref({
+      quantity:25,
+    })
+    // rtc消耗配置
+    const setRtcModal = () => {
+      showRtcModal.value = true
+      rtcModelForm.value.quantity = 25;
+    }
+
+    const showUpdateModal = ref(false)
+    const updateModelForm = ref({
+      updateDatetime:null,
+      modalId:null
+    })
+    //更新模型自建
+    const updateModal = () => {
+      showUpdateModal.value = true
+    }
+
+    // 模型设置提交
+    const modalSubmit = (type) => {
+      // 保存
+      if(type == 'keep'){}
+      // 更新
+      if(type == 'update'){}
+      console.log(updateModelForm.value.updateDatetime)
+    }
+
+    // 把url转成文件
+    const urlToFile = async (url, filename) => {
+      try {
+        const res = await fetch(url)
+        const blob = await res.blob()
+        return new File([blob], filename, { type: blob.type })
+      } catch (err) {
+        message.error('头像加载失败')
+        return null
+      }
+    }
+
+    const voiceOptions = ref([
+      {
+        label: "Drive My Car",
+        value: "song1"
+      },
+      {
+        label: "Norwegian Wood",
+        value: "song2"
+      },
+      {
+        label: "You Won't See",
+        value: "song3"
+      },
+    ])
+
+    const handleUpdateVoiceId = (value, option) => {
+      console.log(value,option)
+      audioRef.value.src = 'https://www.kaoiki.com/rolebot/homepage_guidance/inbound_call.MP3'
+      audioRef.value.load()
+    }
+
+    // 音频DOM实例
+    const audioRef = ref(null)
+    const playVoiceDemo = () => {
+      audioRef.value.play()
+    }
+
+    // 切换switch
+    function railStyle({
+      focused,
+      checked
+    }) {
+      const style = {};
+      if (checked) {
+        style.background = "#d03050";
+        if (focused) {
+          style.boxShadow = "0 0 0 2px #d0305040";
+        }
+      } else {
+        style.background = "#2080f0";
+        if (focused) {
+          style.boxShadow = "0 0 0 2px #2080f040";
+        }
+      }
+      return style;
+    }
+
+    const openAudioTagChange = (value) => {
+      if(value == true){
+        // 当前是上传文件 把文本内容清空充值
+        agentModelForm.value.openAudioUrl = null;
+      }else{
+        // 当前是输入文本开场白  把文件内容清空
+        openAudioUrlList.value = []
+      }
+    }
+
+    // 新建、编辑提交
+    const agentSubmit = () => {
+      const formData = new FormData()
+      // 判断头像是否为空
+      if(avatarList.value.length == 0){
+        dialog.warning({
+            title: '提示',
+            content: '请上传头像。',
+            negativeText: '关闭'
+        })
+        return false
+      }else{
+        formData.append('avatar',avatarList.value[0].file)
+      }
+      // 判断rtc头像是否为空
+      if(rtcAvatarList.value.length == 0){
+        dialog.warning({
+            title: '提示',
+            content: '请上传RTC头像。',
+            negativeText: '关闭'
+        })
+        return false
+      }else{
+        formData.append('avatarRtc',rtcAvatarList.value[0].file)
+      }
+      // 判断聊天背景是否为空
+      if(backgroundList.value.length == 0){
+        dialog.warning({
+            title: '提示',
+            content: '请上传聊天背景。',
+            negativeText: '关闭'
+        })
+        return false
+      }else{
+        formData.append('background',backgroundList.value[0].file)
+      }
+      // 判断开场白是否为空 当前switch为文件时  判断文件是否为空
+      if(agentModelForm.value.fileOrText && openAudioUrlList.value.length == 0){
+        dialog.warning({
+            title: '提示',
+            content: '请上传开场白',
+            negativeText: '关闭'
+        })
+        return false
+      }
+      // 判断开场白是否为空 当前switch为文本时  判断文本是否为空
+      if(!agentModelForm.value.fileOrText && agentModelForm.value.openAudioUrl == null){
+        dialog.warning({
+            title: '提示',
+            content: '请输入开场白',
+            negativeText: '关闭'
+        })
+        return false
+      }
+      // 开场白文件
+      let openAudioUrlFile = openAudioUrlList.value.length > 0 ? openAudioUrlList.value[0].file : null;
+      formData.append('openAudioUrlFile',openAudioUrlFile)
+      // 开场白文本
+      let openAudioUrlText = agentModelForm.value.openAudioUrl ? agentModelForm.value.openAudioUrl : null;
+      formData.append('openAudioUrlText',openAudioUrlText)
+      // 当前是文件还是文本
+      let openAudioTag = agentModelForm.value.fileOrText ? 'file' : 'text'
+      formData.append('openAudioTag',openAudioTag)
+      // 欢迎语
+      let welcomeAudioUrl = welcomeAudioUrlList.value.length > 0 ? welcomeAudioUrlList.value[0].file : null;
+      formData.append('welcomeAudioUrl',welcomeAudioUrl)
+      // 音色
+      if(!agentModelForm.value.voiceId){
+        dialog.warning({
+            title: '提示',
+            content: '请选择一个音色',
+            negativeText: '关闭'
+        })
+        return false
+      }else{
+        formData.append('voiceId',agentModelForm.value.voiceId)
+      }
+      // 语速
+      if(!agentModelForm.value.speed){
+        dialog.warning({
+            title: '提示',
+            content: '请设置语速',
+            negativeText: '关闭'
+        })
+        return false
+      }else{
+        formData.append('speed',agentModelForm.value.speed)
+      }
+      // 智能体名称
+      if(!agentModelForm.value.name){
+        dialog.warning({
+            title: '提示',
+            content: '请输入智能体名称',
+            negativeText: '关闭'
+        })
+        return false
+      }else{
+        formData.append('name',agentModelForm.value.name)
+      }
+      // 智能体摘要
+      if(!agentModelForm.value.digest){
+        dialog.warning({
+            title: '提示',
+            content: '请输入智能体摘要',
+            negativeText: '关闭'
+        })
+        return false
+      }else{
+        formData.append('digest',agentModelForm.value.digest)
+      }
+      // BotId
+      if(!agentModelForm.value.botId){
+        dialog.warning({
+            title: '提示',
+            content: '请输入botId',
+            negativeText: '关闭'
+        })
+        return false
+      }else{
+        formData.append('botId',agentModelForm.value.botId)
+      }
+      // 资源点消耗
+      formData.append('quantity',agentModelForm.value.quantity)
+      
+      
+
+    }
+
+    //global init
+    onMounted(() => {
+      // urlToFile('/cors-img/rolebot/mini_program/rtc_avatar_background/bobozai_avatar.gif','bobozai_avatar.gif').then(file => {
+      //   rtcAvatarList.value.push({
+      //     file:file,
+      //     name: "bobozai_avatar.gif"
+      //   })
+      //   console.log(file)
+      //   console.log(rtcAvatarList.value)
+      // })
+
+      urlToFile('/cors-img/rolebot/mini_program/avatar_background/artist_dd_background.mp4','artist_dd_background.mp4').then(file => {
+        backgroundList.value.push({
+          file:file,
+          name: "artist_dd_background.mp4",
+          status:"pending"
+        })
+        console.log(file)
+        console.log(backgroundList.value)
+      })
+    });
+
+</script>
+
+<template>
+  <div class="agent-management-container">
+    <!-- 顶部操作栏 -->
+    <div class="top-actions">
+      <n-button class="action-btn" @click="createAgent">
+        <template #icon>
+          <n-icon>
+            <AddOne />
+          </n-icon>
+        </template>
+        新建 Agent
+      </n-button>
+      <n-button class="action-btn">
+        <template #icon>
+          <n-icon>
+            <Refresh />
+          </n-icon>
+        </template>
+        刷新
+      </n-button>
+      <n-button class="action-btn" @click="setRtcModal">
+        <template #icon>
+          <n-icon>
+            <Setting />
+          </n-icon>
+        </template>
+        RTC 统一设置
+      </n-button>
+      <n-button class="action-btn" @click="updateModal">
+        <template #icon>
+          <n-icon>
+            <Sync />
+          </n-icon>
+        </template>
+        更新模型 (自建)
+      </n-button>
+      <n-select
+        class="filter-select"
+        :value="filterValue"
+        :options="filterOptions"
+        @update:value="handleFilterChange"
+        style="width: 120px;border: 1px solid #e5e7eb;border-radius: 6px;"
+      />
+    </div>
+
+    <!-- Agent 卡片列表 -->
+    <div class="agent-grid">
+      <div class="agent-card">
+        <div class="card-header">
+          <span class="agent-name">乐宝</span>
+          <n-dropdown trigger="click" :options="getCardMenuOptions(filterValue)" @select="handleMenuSelect">
+            <n-button text>
+              <n-icon>
+                <More />
+              </n-icon>
+            </n-button>
+          </n-dropdown>
+        </div>
+        <div class="card-footer">
+          <n-tag type="info" size="small">自建</n-tag>
+          <span class="update-time">更新于 2026-05-06</span>
+        </div>
+      </div>
+
+      <div class="agent-card">
+        <div class="card-header">
+          <span class="agent-name">波波仔</span>
+          <n-dropdown trigger="click" :options="getCardMenuOptions(filterValue)" @select="handleMenuSelect">
+            <n-button text>
+              <n-icon>
+                <More />
+              </n-icon>
+            </n-button>
+          </n-dropdown>
+        </div>
+        <div class="card-footer">
+          <n-tag type="success" size="small">官方</n-tag>
+          <span class="update-time">更新于 2026-05-04</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 分页 -->
+    <div class="pagination-container">
+      <n-pagination
+        v-model:page="currentPage"
+        :page-count="totalPages"
+        @update:page="onUpdatePage"
+      />
+    </div>
+  </div>
+
+  <!-- 创建 or 编辑 agent -->
+  <n-drawer :width="520" v-model:show="showAgentModal">
+    <n-drawer-content :title="agentModalTitle" :native-scrollbar="false" closable>
+      <n-card
+        style="width: 480px;"
+        :bordered="false"
+      >
+        <n-space vertical>
+          <n-form
+            :model="agentModelForm"
+            label-placement="top"
+            :label-width="160"
+            :style="{
+              maxWidth: '580px',
+            }"
+          >
+            <n-form-item label="头像">
+              <n-upload
+                v-model:file-list="avatarList"
+                accept="image/png, image/jpeg, image/jpg"
+                list-type="image-card"
+                :multiple="false"
+                :max="1"
+              >
+                点击上传
+              </n-upload>
+            </n-form-item>
+            <n-form-item label="RTC 头像">
+              <n-upload
+                v-model:file-list="rtcAvatarList"
+                accept="image/gif"
+                list-type="image-card"
+                :multiple="false"
+                :max="1"
+              >
+                点击上传
+              </n-upload>
+            </n-form-item>
+            <n-form-item label="聊天背景">
+              <n-upload
+                v-model:file-list="backgroundList"
+                accept="video/mp4"
+                :multiple="false"
+                :max="1"
+              >
+                <n-button>点击上传</n-button>
+              </n-upload>
+            </n-form-item>
+            <n-form-item label="开场白" path="fileOrText">
+              <n-switch :rail-style="railStyle" v-model:value="agentModelForm.fileOrText" @update:value="openAudioTagChange">
+                <template #checked>
+                  文件
+                </template>
+                <template #unchecked>
+                  文本
+                </template>
+              </n-switch>
+            </n-form-item>
+            <n-upload
+              style="margin-bottom:20px;"
+              v-if="agentModelForm.fileOrText"
+              v-model:file-list="openAudioUrlList"
+              accept="audio/mp3"
+              :multiple="false"
+              :max="1"
+            >
+              <n-button>点击上传</n-button>
+            </n-upload>
+            <n-input v-else style="margin-bottom:20px;" v-model:value="agentModelForm.openAudioUrl" type="text" placeholder="请输入开场白" />
+            <n-form-item label="欢迎语" path="isRoleStory">
+              <n-switch :rail-style="railStyle" v-model:value="agentModelForm.isRoleStory">
+                <template #checked>
+                  有角色故事
+                </template>
+                <template #unchecked>
+                  无角色故事
+                </template>
+              </n-switch>
+            </n-form-item>
+            <n-upload
+              style="margin-bottom:20px;"
+              v-if="agentModelForm.isRoleStory"
+              v-model:file-list="welcomeAudioUrlList"
+              accept="audio/mp3"
+              :multiple="false"
+              :max="1"
+            >
+              <n-button>点击上传</n-button>
+            </n-upload>
+            <n-form-item label="音色" path="voiceId">
+              <n-select
+                v-model:value="agentModelForm.voiceId"
+                filterable
+                placeholder="请选择音色"
+                :options="voiceOptions"
+                @update:value="handleUpdateVoiceId"
+              />
+              <n-icon size="20px" style="margin-left:10px;cursor:pointer;" v-if="agentModelForm.voiceId" @click="playVoiceDemo">
+                <Play/>
+              </n-icon>
+              <!-- 音频标签 完全隐藏 -->
+              <audio ref="audioRef" style="display: none;"/>
+            </n-form-item>
+            <n-form-item label="语速" path="speed">
+              <n-input-number v-model:value="agentModelForm.speed" clearable :precision="1" :min="1" placeholder="请设置语速" style="width:100%"/>
+            </n-form-item>
+            <n-form-item label="智能体名称" path="name">
+              <n-input v-model:value="agentModelForm.name" type="text" placeholder="请输入智能体名称" />
+            </n-form-item>
+            <n-form-item label="智能体摘要" path="digest">
+              <n-input v-model:value="agentModelForm.digest" type="text" placeholder="请输入智能体摘要" />
+            </n-form-item>
+            <n-form-item label="Bot Id" path="botId">
+              <n-input v-model:value="agentModelForm.botId" type="text" placeholder="请输入botId" />
+            </n-form-item>
+            <n-form-item label="资源点消耗" path="quantity">
+              <n-slider v-model:value="agentModelForm.quantity" :step="1"/>
+            </n-form-item>
+          
+          </n-form>
+        </n-space>
+      </n-card>
+      <template #footer>
+        <n-flex justify="space-around" size="large">
+          <n-button type="primary" @click="agentSubmit">
+            保存
+          </n-button>
+        </n-flex>
+      </template>
+    </n-drawer-content>
+    
+  </n-drawer>
+
+  <!-- rtc消耗点配置 -->
+  <n-modal v-model:show="showRtcModal" :auto-focus="false">
+    <n-card
+      style="width: 600px"
+      title="配置RTC耗点"
+      :bordered="false"
+      size="huge"
+      role="dialog"
+      aria-modal="true"
+    >
+      <template #header-extra>
+        <n-icon size="25px" @click="showRtcModal = false">
+          <CloseOne/>
+        </n-icon>
+      </template>
+      <n-form
+        :model="rtcModelForm"
+        label-placement="top"
+        :label-width="160"
+        :style="{
+          maxWidth: '580px',
+        }"
+      >
+        <n-form-item label="RTC资源点消耗" path="quantity">
+          <n-slider v-model:value="rtcModelForm.quantity" :step="1"/>
+        </n-form-item>
+      
+      </n-form>
+      <template #footer>
+        <n-flex justify="space-around" size="large">
+          <n-button type="primary">保存</n-button>
+        </n-flex>
+      </template>
+    </n-card>
+  </n-modal>
+
+  <!-- 更新模型自建 -->
+  <n-modal v-model:show="showUpdateModal">
+    <n-card
+      style="width: 600px"
+      title="更新模型(自建)"
+      :bordered="false"
+      size="huge"
+      role="dialog"
+      aria-modal="true"
+    >
+      <template #header-extra>
+        <n-icon size="25px" @click="showUpdateModal = false">
+          <CloseOne/>
+        </n-icon>
+      </template>
+      <n-form
+        :model="updateModelForm"
+        label-placement="top"
+        :label-width="160"
+        :style="{
+          maxWidth: '580px',
+        }"
+      >
+        <n-form-item label="更新边界" path="updateDatetime">
+          <n-date-picker
+            v-model:formatted-value="updateModelForm.updateDatetime"
+            value-format="yyyy-MM-dd HH:mm:ss"
+            type="datetime"
+            clearable
+            style="width:100%"
+          />
+        </n-form-item>
+        <n-form-item label="模型ID" path="modalId">
+          <n-input v-model:value="updateModelForm.modalId" type="text" placeholder="请输入模型ID" />
+        </n-form-item>
+      
+      </n-form>
+      <template #footer>
+        <n-flex justify="space-around" size="large">
+          <n-button @click="showUpdateModal = false">取消</n-button>
+          <n-button type="primary" @click="modalSubmit('keep')">保存</n-button>
+          <n-button type="info" @click="modalSubmit('update')">保存并更新</n-button>
+        </n-flex>
+      </template>
+    </n-card>
+  </n-modal>
+</template>
+
+<style scoped>
+.agent-management-container {
+  padding: 24px;
+}
+
+.top-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+
+.action-btn {
+  border-radius: 6px;
+  border: 1px solid #e5e7eb;
+  background-color: white;
+}
+
+.agent-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 24px;
+  margin-bottom: 40px;
+}
+
+.agent-card {
+  background-color: white;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 160px;
+  box-sizing: border-box;
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.agent-name {
+  font-size: 16px;
+  font-weight: 500;
+  color: #111827;
+}
+
+.card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: auto;
+  padding-top: 16px;
+}
+
+.update-time {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.pagination-container {
+  display: flex;
+  justify-content: center;
+  margin-top: auto;
+  padding-top: 24px;
+  border-top: 1px solid #e5e7eb;
+}
+
+</style>
+
+

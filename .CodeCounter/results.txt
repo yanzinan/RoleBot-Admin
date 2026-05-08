@@ -1,0 +1,90 @@
+Date : 2024-10-28 09:08:53
+Directory : ./
+Total : 48 files,  29058 codes, 845 comments, 1653 blanks, all 31556 lines, 2.83% comment rate
+
+Languages
++------------+------------+------------+------------+------------+------------+--------------+
+| language   | files      | code       | comment    | blank      | total      | comment rate |
++------------+------------+------------+------------+------------+------------+--------------+
+| Vue        |         24 |     17,944 |        490 |      1,582 |     20,016 |        2.66% |
+| JavaScript |          7 |      7,570 |        313 |         29 |      7,912 |        3.97% |
+| JSON       |          8 |      3,426 |          0 |          6 |      3,432 |        0.00% |
+| CSS        |          3 |         73 |         38 |         31 |        142 |       34.23% |
+| HTML       |          2 |         39 |          4 |          2 |         45 |        9.30% |
+| XML        |          3 |          3 |          0 |          0 |          3 |        0.00% |
+| Markdown   |          1 |          3 |          0 |          3 |          6 |        0.00% |
++------------+------------+------------+------------+------------+------------+--------------+
+
+Directories
++----------------------------------------------+------------+------------+------------+------------+------------+--------------+
+| path                                         | files      | code       | comment    | blank      | total      | comment rate |
++----------------------------------------------+------------+------------+------------+------------+------------+--------------+
+| .                                            |         48 |     29,058 |        845 |      1,653 |     31,556 |        2.83% |
+| src                                          |         32 |     18,451 |        539 |      1,637 |     20,627 |        2.84% |
+| src\views                                    |         22 |     17,821 |        489 |      1,556 |     19,866 |        2.67% |
+| src\views\main                               |         20 |     17,547 |        477 |      1,488 |     19,512 |        2.65% |
+| dist                                         |          7 |      7,926 |        299 |          4 |      8,229 |        3.64% |
+| dist\assets                                  |          2 |      7,121 |        297 |          1 |      7,419 |        4.00% |
+| public                                       |          4 |        785 |          0 |          2 |        787 |        0.00% |
+| src\services                                 |          2 |        388 |         10 |         18 |        416 |        2.51% |
+| src\components                               |          1 |         79 |          1 |         19 |         99 |        1.25% |
+| src\assets                                   |          2 |         40 |         16 |         14 |         70 |       28.57% |
+| src\views\main\report                        |          3 |         33 |          0 |         12 |         45 |        0.00% |
+| src\stores                                   |          1 |         17 |          0 |          1 |         18 |        0.00% |
+| src\plugins                                  |          1 |          8 |          0 |          1 |          9 |        0.00% |
++----------------------------------------------+------------+------------+------------+------------+------------+--------------+
+
+Files
++----------------------------------------------+------------+------------+------------+------------+------------+--------------+
+| filename                                     | language   | code       | comment    | blank      | total      | comment rate |
++----------------------------------------------+------------+------------+------------+------------+------------+--------------+
+| README.md                                    | Markdown   |          3 |          0 |          3 |          6 |        0.00% |
+| dist\assets\index-C9vlacZQ.css               | CSS        |          1 |          0 |          1 |          2 |        0.00% |
+| dist\assets\index-MYsnrAh2.js                | JavaScript |      7,120 |        297 |          0 |      7,417 |        4.00% |
+| dist\cn.json                                 | JSON       |          0 |          0 |          1 |          1 |        0.00% |
+| dist\en.json                                 | JSON       |        784 |          0 |          0 |        784 |        0.00% |
+| dist\index.html                              | HTML       |         20 |          2 |          1 |         23 |        9.09% |
+| dist\th.json                                 | JSON       |          0 |          0 |          1 |          1 |        0.00% |
+| dist\vite.svg                                | XML        |          1 |          0 |          0 |          1 |        0.00% |
+| index.html                                   | HTML       |         19 |          2 |          1 |         22 |        9.52% |
+| package-lock.json                            | JSON       |      1,832 |          0 |          1 |      1,833 |        0.00% |
+| package.json                                 | JSON       |         26 |          0 |          1 |         27 |        0.00% |
+| public\cn.json                               | JSON       |          0 |          0 |          1 |          1 |        0.00% |
+| public\en.json                               | JSON       |        784 |          0 |          0 |        784 |        0.00% |
+| public\th.json                               | JSON       |          0 |          0 |          1 |          1 |        0.00% |
+| public\vite.svg                              | XML        |          1 |          0 |          0 |          1 |        0.00% |
+| src\App.vue                                  | Vue        |         44 |          0 |          7 |         51 |        0.00% |
+| src\assets\main.css                          | CSS        |         39 |         16 |         14 |         69 |       29.09% |
+| src\assets\vue.svg                           | XML        |          1 |          0 |          0 |          1 |        0.00% |
+| src\components\HelloWorld.vue                | Vue        |         79 |          1 |         19 |         99 |        1.25% |
+| src\main.js                                  | JavaScript |         21 |          1 |          5 |         27 |        4.55% |
+| src\plugins\storePlugin.js                   | JavaScript |          8 |          0 |          1 |          9 |        0.00% |
+| src\services\axios.js                        | JavaScript |        223 |          3 |         11 |        237 |        1.33% |
+| src\services\router.js                       | JavaScript |        165 |          7 |          7 |        179 |        4.07% |
+| src\stores\store.js                          | JavaScript |         17 |          0 |          1 |         18 |        0.00% |
+| src\style.css                                | CSS        |         33 |         22 |         16 |         71 |       40.00% |
+| src\views\Login.vue                          | Vue        |        110 |          7 |         32 |        149 |        5.98% |
+| src\views\Mainlayout.vue                     | Vue        |        164 |          5 |         36 |        205 |        2.96% |
+| src\views\main\Address.vue                   | Vue        |        460 |         15 |         42 |        517 |        3.16% |
+| src\views\main\Agent.vue                     | Vue        |        748 |         18 |         80 |        846 |        2.35% |
+| src\views\main\Change.vue                    | Vue        |        113 |          2 |         25 |        140 |        1.74% |
+| src\views\main\Channel.vue                   | Vue        |      1,015 |         24 |         91 |      1,130 |        2.31% |
+| src\views\main\Corp.vue                      | Vue        |      1,688 |         55 |        115 |      1,858 |        3.16% |
+| src\views\main\Finance.vue                   | Vue        |      1,068 |         37 |         88 |      1,193 |        3.35% |
+| src\views\main\Group.vue                     | Vue        |        688 |         29 |         60 |        777 |        4.04% |
+| src\views\main\Guest.vue                     | Vue        |      1,458 |         23 |        143 |      1,624 |        1.55% |
+| src\views\main\Home.vue                      | Vue        |        628 |         28 |         54 |        710 |        4.27% |
+| src\views\main\Logout.vue                    | Vue        |         16 |          0 |          2 |         18 |        0.00% |
+| src\views\main\Module.vue                    | Vue        |        914 |         39 |         79 |      1,032 |        4.09% |
+| src\views\main\Order.vue                     | Vue        |      4,483 |         90 |        348 |      4,921 |        1.97% |
+| src\views\main\Project.vue                   | Vue        |        463 |         13 |         44 |        520 |        2.73% |
+| src\views\main\Report.vue                    | Vue        |         36 |          2 |         12 |         50 |        5.26% |
+| src\views\main\Schedule.vue                  | Vue        |      2,024 |         59 |        136 |      2,219 |        2.83% |
+| src\views\main\Staff.vue                     | Vue        |        951 |         20 |         92 |      1,063 |        2.06% |
+| src\views\main\ThaiPeople.vue                | Vue        |        761 |         23 |         65 |        849 |        2.93% |
+| src\views\main\report\EmployeeStatistics.vue | Vue        |         11 |          0 |          4 |         15 |        0.00% |
+| src\views\main\report\OrderStatistics.vue    | Vue        |         11 |          0 |          4 |         15 |        0.00% |
+| src\views\main\report\RevenueStatistics.vue  | Vue        |         11 |          0 |          4 |         15 |        0.00% |
+| vite.config.js                               | JavaScript |         16 |          5 |          4 |         25 |       23.81% |
+| Total                                        |            |     29,058 |        845 |      1,653 |     31,556 |        2.83% |
++----------------------------------------------+------------+------------+------------+------------+------------+--------------+
