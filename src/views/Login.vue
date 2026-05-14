@@ -34,14 +34,45 @@
     })
 
     const loginDo = () => {
-        sessionStorage.setItem("Login","true")
-        router.push("/");
+        if (!loginData.value.usr || !loginData.value.pwd) {
+            // 如果usr或pwd为空或null，则执行以下代码
+            tipsForLogin("账号和密码不能为空。");
+        } else {
+            // 打开加载中loading
+            proxy.$mainStore.setAllLoading(true);
+            // 如果usr和pwd都不为空且不为null，则执行以下代码
+            axiosService.post('admin-login',{
+                "username": loginData.value.usr,
+                "password": loginData.value.pwd
+            })
+            .then(response => {
+                if(response.code == 0){
+                    sessionStorage.setItem("Login","True");
+                    sessionStorage.setItem("username",response.data.username);
+                    sessionStorage.setItem("id",response.data.id);
+                    sessionStorage.setItem("token",response.data.token);
+                    router.push("/");
+                }else{
+                    tipsForLogin(response.msg)
+                }
+                proxy.$mainStore.setAllLoading(false);
+            })
+            
+        }
     }
 
     const adjustMargins = () => {
         marginLeft.value = ( window.innerWidth - document.getElementById("loginCard").clientWidth) / 2
         marginTop.value = ( window.innerHeight - document.getElementById("loginCard").clientHeight) / 2
     }
+
+    const tipsForLogin = (msg) => {
+        Swal.fire({
+            icon: "error",
+            title:'提示',
+            text:msg,
+        });
+    };
 
     onMounted(()=>{
        window.addEventListener("resize", adjustMargins)

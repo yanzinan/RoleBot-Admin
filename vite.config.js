@@ -33,10 +33,10 @@ export default defineConfig(({ command, mode }) => {
     }, 
     server: {
       proxy: {
-        '/cors-img': {
-          target: 'https://www.spriteon.com',
+        '/api': {
+          target: 'http://www.kaoiki.com:8080',
           changeOrigin: true,
-          rewrite: path => path.replace(/^\/cors-img/, '')
+          rewrite: path => path.replace(/^\/api/, '')
         }
       }
     } 

@@ -49,30 +49,23 @@
 
 
     // 筛选选项
-    const filterValue = ref('official')
+    const filterValue = ref('0')
     const filterOptions = [
         { label: '全部', value: 'all' },
-        { label: '自建', value: 'custom' },
-        { label: '官方', value: 'official' }
+        { label: '自建', value: '1' },
+        { label: '官方', value: '0' }
     ]
     // 筛选下拉切换事件
     const handleFilterChange = (value) => {
         filterValue.value = value
-        // 在这里写筛选逻辑：调用接口 / 过滤本地数据
-        if (value === 'all') {
-            console.log('展示全部 Agent')
-        } else if (value === 'custom') {
-            console.log('只展示 自建 Agent')
-        } else if (value === 'official') {
-            console.log('只展示 官方 Agent')
-        }
         // 切换筛选后可以重置分页
         currentPage.value = 1
+        getAgentList()
     }
 
     // 卡片菜单选项
     const getCardMenuOptions = (type) => {
-        if (type === 'custom') {
+        if (type === 1) {
             // 自建 → 只显示 删除
             return [{ label: '删除', key: 'delete' }]
         } else {
@@ -87,10 +80,31 @@
     // 分页数据
     const currentPage = ref(1)
     const pageSize = ref(10)
-    const totalPages = ref(16)
+    const totalPages = ref(1)
+    const agentList = ref([])
+
+    const getAgentList = async () => {
+      // 打开加载中loading
+      proxy.$mainStore.setAllLoading(true);
+      await axiosService.get('agent-list',{
+        page:currentPage.value,
+        pageSize:pageSize.value,
+        agentType:filterValue.value
+      })
+      .then(response => {
+          if(response.code == 0){
+              agentList.value = response.data.list;
+              totalPages.value = response.data.totalPage;
+              console.log(response.data)
+          }else{
+              tipsForLogin(response.msg)
+          }
+          proxy.$mainStore.setAllLoading(false);
+      })
+    }
 
     // 处理下拉菜单点击
-    const handleMenuSelect = (key) => {
+    const handleMenuSelect = (key,item) => {
         if (key === 'delete') {
             // 删除：弹出二次确认框
             dialog.warning({
@@ -109,14 +123,107 @@
         } else if (key === 'edit') {
             console.log('编辑')
             // 编辑逻辑
+
+            // 获取音色列表
+            getVoiceList()
+
+            // 数据回显
+            // 头像
+            let avatarUrl = item.avatar;
+            let avatarFileName = item.avatar.split('/').pop()
+            console.log(avatarUrl,avatarFileName)
+            urlToFile(avatarUrl,avatarFileName).then(file => {
+              avatarList.value = [];
+              avatarList.value.push({
+                file:file,
+                name: avatarFileName,
+                status:"pending"
+              })
+            })
+            // RTC头像
+            let rtcAvatarUrl = item.avatar
+            rtcAvatarUrl = rtcAvatarUrl.replace("avatar_background","rtc_avatar_background")
+            rtcAvatarUrl = rtcAvatarUrl.replace(/\.(jpg|jpeg|png|webp|bmp|svg|tiff)$/i, '.gif')
+            let rtcAvatarFileName = rtcAvatarUrl.split('/').pop()
+            console.log(rtcAvatarUrl,rtcAvatarFileName)
+            urlToFile(rtcAvatarUrl,rtcAvatarFileName).then(file => {
+              rtcAvatarList.value = [];
+              rtcAvatarList.value.push({
+                file:file,
+                name: rtcAvatarFileName,
+                status:"pending"
+              })
+            })
+            // 聊天背景
+            let backgroundUrl = item.background
+            let backgroundFileName = item.background.split('/').pop()
+            urlToFile(backgroundUrl,backgroundFileName).then(file => {
+              backgroundList.value = [];
+              backgroundList.value.push({
+                file:file,
+                name: backgroundFileName,
+                status:"pending"
+              })
+            })
+            // 开场白
+            if(item.openAudioUrl.indexOf("mp3") < 0){
+              agentModelForm.value.fileOrText = false
+              agentModelForm.value.openAudioUrl = item.openAudioUrl;
+              openAudioUrlList.value = [];
+            }else{
+              agentModelForm.value.fileOrText = true
+              agentModelForm.value.openAudioUrl = null;
+              let openAudioFileUrl = item.openAudioUrl
+              let openAudioFileFileName = item.openAudioUrl.split('/').pop()
+              urlToFile(openAudioFileUrl,openAudioFileFileName).then(file => {
+                openAudioUrlList.value = [];
+                openAudioUrlList.value.push({
+                  file:file,
+                  name: openAudioFileFileName,
+                  status:"pending"
+                })
+              })
+            }
+            // 欢迎语
+            if(item.welcomeAudioUrl){
+              let welcomeAudioFileUrl = item.welcomeAudioUrl
+              let welcomeAudioFileFileName = item.welcomeAudioUrl.split('/').pop()
+              urlToFile(welcomeAudioFileUrl,welcomeAudioFileFileName).then(file => {
+                welcomeAudioUrlList.value = [];
+                welcomeAudioUrlList.value.push({
+                  file:file,
+                  name: welcomeAudioFileFileName,
+                  status:"pending"
+                })
+              })
+              agentModelForm.value.isRoleStory = true
+            }else{
+              agentModelForm.value.isRoleStory = false
+            }
+            // 音色
+            agentModelForm.value.voiceId = item.voiceId;
+            // 语速
+            agentModelForm.value.speed = item.speed;
+            // 智能体名称
+            agentModelForm.value.name = item.name;
+            // 智能体摘要
+            agentModelForm.value.digest = item.digest;
+            // botId
+            agentModelForm.value.botId = item.botId;
+            // 资源点消耗
+            agentModelForm.value.quantity = item.quantity;
+
             showAgentModal.value = true
             agentModalTitle.value = '编辑'
+
         }
     }
 
     // 当前页发生改变时
     const onUpdatePage = (page) => {
         console.log(page)
+        currentPage.value = page;
+        getAgentList()
     }
 
     const showAgentModal = ref(false)
@@ -158,6 +265,8 @@
       backgroundList.value = []
       openAudioUrlList.value = []
       welcomeAudioUrlList.value = []
+      // 获取音色列表
+      getVoiceList()
     }
 
     const showRtcModal = ref(false)
@@ -216,6 +325,28 @@
         value: "song3"
       },
     ])
+
+    // 获取音色列表
+    const getVoiceList = async () => {
+      // 打开加载中loading
+      proxy.$mainStore.setAllLoading(true);
+      await axiosService.post('voice-list',{})
+      .then(response => {
+          if(response.code == 0){
+              voiceOptions.value = []
+              response.data.forEach(item => {
+                let obj = {};
+                obj.label = item.name;
+                obj.value = item.id;
+                obj.demo = item.demo
+              })
+              voiceOptions.value.push(obj)
+          }else{
+              tipsForLogin(response.msg)
+          }
+          proxy.$mainStore.setAllLoading(false);
+      })
+    }
 
     const handleUpdateVoiceId = (value, option) => {
       console.log(value,option)
@@ -387,26 +518,17 @@
 
     }
 
+    const tipsForLogin = (msg) => {
+        Swal.fire({
+            icon: "error",
+            title:"提示",
+            text:msg,
+        });
+    };
+
     //global init
     onMounted(() => {
-      // urlToFile('/cors-img/rolebot/mini_program/rtc_avatar_background/bobozai_avatar.gif','bobozai_avatar.gif').then(file => {
-      //   rtcAvatarList.value.push({
-      //     file:file,
-      //     name: "bobozai_avatar.gif"
-      //   })
-      //   console.log(file)
-      //   console.log(rtcAvatarList.value)
-      // })
-
-      urlToFile('/cors-img/rolebot/mini_program/avatar_background/artist_dd_background.mp4','artist_dd_background.mp4').then(file => {
-        backgroundList.value.push({
-          file:file,
-          name: "artist_dd_background.mp4",
-          status:"pending"
-        })
-        console.log(file)
-        console.log(backgroundList.value)
-      })
+      getAgentList()
     });
 
 </script>
@@ -458,10 +580,11 @@
 
     <!-- Agent 卡片列表 -->
     <div class="agent-grid">
-      <div class="agent-card">
+
+      <div class="agent-card" v-for="item in agentList" :key="item.id">
         <div class="card-header">
-          <span class="agent-name">乐宝</span>
-          <n-dropdown trigger="click" :options="getCardMenuOptions(filterValue)" @select="handleMenuSelect">
+          <span class="agent-name">{{item.name}}</span>
+          <n-dropdown trigger="click" :options="getCardMenuOptions(item.agentType)" @select="(key) => handleMenuSelect(key,item)">
             <n-button text>
               <n-icon>
                 <More />
@@ -470,27 +593,12 @@
           </n-dropdown>
         </div>
         <div class="card-footer">
-          <n-tag type="info" size="small">自建</n-tag>
-          <span class="update-time">更新于 2026-05-06</span>
+          <n-tag v-if="item.agentType == 0" type="info" size="small">官方</n-tag>
+          <n-tag v-if="item.agentType == 1" type="primary" size="small">自建</n-tag>
+          <span class="update-time">更新于 {{item.updateDatetime.split("T")[0]}}</span>
         </div>
       </div>
 
-      <div class="agent-card">
-        <div class="card-header">
-          <span class="agent-name">波波仔</span>
-          <n-dropdown trigger="click" :options="getCardMenuOptions(filterValue)" @select="handleMenuSelect">
-            <n-button text>
-              <n-icon>
-                <More />
-              </n-icon>
-            </n-button>
-          </n-dropdown>
-        </div>
-        <div class="card-footer">
-          <n-tag type="success" size="small">官方</n-tag>
-          <span class="update-time">更新于 2026-05-04</span>
-        </div>
-      </div>
     </div>
 
     <!-- 分页 -->
