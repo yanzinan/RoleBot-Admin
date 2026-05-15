@@ -53,7 +53,7 @@
                 })
                 .then(response => {
                     if(response.code == 200){
-                        sessionStorage.clear();
+                        localStorage.clear();
                         router.push("login");
                     }else{
                         Swal.fire({

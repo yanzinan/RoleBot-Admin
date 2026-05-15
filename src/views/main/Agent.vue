@@ -97,7 +97,7 @@
               totalPages.value = response.data.totalPage;
               console.log(response.data)
           }else{
-              tipsForLogin(response.msg)
+              tipsForLogin(response.code,response.message)
           }
           proxy.$mainStore.setAllLoading(false);
       })
@@ -115,6 +115,19 @@
                 onPositiveClick: () => {
                     // 在这里写真正的删除逻辑（接口请求）
                     console.log('执行删除操作')
+                    // 打开加载中loading
+                    proxy.$mainStore.setAllLoading(true);
+                    axiosService.post('agent-delete',{
+                      id:item.id,
+                    })
+                    .then(response => {
+                        if(response.code == 0){
+                            getAgentList()
+                        }else{
+                            tipsForLogin(response.code,response.message)
+                        }
+                        proxy.$mainStore.setAllLoading(false);
+                    })
                 },
                 onNegativeClick: () => {
                     console.log('取消删除')
@@ -212,6 +225,8 @@
             agentModelForm.value.botId = item.botId;
             // 资源点消耗
             agentModelForm.value.quantity = item.quantity;
+            // agentId
+            agentModelForm.value.agentId = item.id;
 
             showAgentModal.value = true
             agentModalTitle.value = '编辑'
@@ -226,9 +241,17 @@
         getAgentList()
     }
 
+    // 刷新
+    const refreshAgent = () => {
+      currentPage.value = 1;
+      filterValue.value = '0';
+      getAgentList()
+    }
+
     const showAgentModal = ref(false)
     const agentModalTitle = ref('')
     const agentModelForm = ref({
+      agentId:null,
       voiceId:null,
       speed:null,
       fileOrText:true,
@@ -311,46 +334,37 @@
       }
     }
 
-    const voiceOptions = ref([
-      {
-        label: "Drive My Car",
-        value: "song1"
-      },
-      {
-        label: "Norwegian Wood",
-        value: "song2"
-      },
-      {
-        label: "You Won't See",
-        value: "song3"
-      },
-    ])
+    const voiceOptions = ref([])
 
     // 获取音色列表
     const getVoiceList = async () => {
       // 打开加载中loading
       proxy.$mainStore.setAllLoading(true);
-      await axiosService.post('voice-list',{})
+      await axiosService.get('voice-list',{})
       .then(response => {
           if(response.code == 0){
               voiceOptions.value = []
               response.data.forEach(item => {
                 let obj = {};
                 obj.label = item.name;
-                obj.value = item.id;
+                obj.value = item.voiceId;
                 obj.demo = item.demo
+                voiceOptions.value.push(obj)
               })
-              voiceOptions.value.push(obj)
+            // JS 最常用的查找方法：find
+            const result = voiceOptions.value.find(item => item.value === agentModelForm.value.voiceId);
+
+            // 取出 demo
+            audioRef.value.src = result ? result.demo : null;
           }else{
-              tipsForLogin(response.msg)
+              tipsForLogin(response.code,response.message)
           }
           proxy.$mainStore.setAllLoading(false);
       })
     }
 
     const handleUpdateVoiceId = (value, option) => {
-      console.log(value,option)
-      audioRef.value.src = 'https://www.kaoiki.com/rolebot/homepage_guidance/inbound_call.MP3'
+      audioRef.value.src = option.demo
       audioRef.value.load()
     }
 
@@ -518,12 +532,23 @@
 
     }
 
-    const tipsForLogin = (msg) => {
+    const tipsForLogin = (code,msg) => {
+      if(code == 401){
+        Swal.fire({
+            icon: "error",
+            title:"Token is missing or invalid!",
+            confirmButtonText: "重新登录",
+        }).then(() => {
+          localStorage.clear();
+          router.push('/login')
+        });;
+      }else{
         Swal.fire({
             icon: "error",
             title:"提示",
             text:msg,
         });
+      }
     };
 
     //global init
@@ -545,7 +570,7 @@
         </template>
         新建 Agent
       </n-button>
-      <n-button class="action-btn">
+      <n-button class="action-btn" @click="refreshAgent">
         <template #icon>
           <n-icon>
             <Refresh />

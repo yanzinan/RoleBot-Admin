@@ -10,13 +10,14 @@ const baseUrl = '/api';
 const apiUrls = {
   'admin-login':'/api/v1/admin/login',
   'voice-list':'/api/v1/voice/list',
-  'agent-list':'/api/v1/agent/list'
+  'agent-list':'/api/v1/agent/list',
+  'agent-delete':'/api/v1/agent/delete'
 };
 
 export function useAxios() {
   // 统一添加token到请求头
   const addTokenToHeader = (config) => {
-    const token = sessionStorage.getItem('token');
+    const token = localStorage.getItem('token');
     if (token) {
       config.headers['token'] = token;
     }
@@ -55,7 +56,7 @@ export function useAxios() {
               confirm: 'OK',
             }
         }).then(() => {
-          sessionStorage.clear();
+          localStorage.clear();
           ZRouter.push('/login')
         });
       }
@@ -89,7 +90,7 @@ export function useAxios() {
               confirm: 'OK',
             }
         }).then(() => {
-          sessionStorage.clear();
+          localStorage.clear();
           ZRouter.push('/login')
         });
       }

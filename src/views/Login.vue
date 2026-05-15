@@ -47,10 +47,10 @@
             })
             .then(response => {
                 if(response.code == 0){
-                    sessionStorage.setItem("Login","True");
-                    sessionStorage.setItem("username",response.data.username);
-                    sessionStorage.setItem("id",response.data.id);
-                    sessionStorage.setItem("token",response.data.token);
+                    localStorage.setItem("Login","True");
+                    localStorage.setItem("username",response.data.username);
+                    localStorage.setItem("id",response.data.id);
+                    localStorage.setItem("token",response.data.token);
                     router.push("/");
                 }else{
                     tipsForLogin(response.msg)

@@ -3,7 +3,7 @@
     import { useRouter } from 'vue-router';
     const router = useRouter();
     onMounted(() => {
-        sessionStorage.clear();
+        localStorage.clear();
         router.push("/login");
     })
 </script>
