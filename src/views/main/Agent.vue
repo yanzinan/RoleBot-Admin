@@ -295,11 +295,75 @@
     const showRtcModal = ref(false)
     const rtcModelForm = ref({
       quantity:25,
+      rtcValue:null,
+      pat:null,
     })
+    const rtcOptions = ref([
+      {
+        label:'PAT',
+        value:'pat'
+      },
+      {
+        label:'费用',
+        value:'cost'
+      },
+    ])
+
+    const rtcHandleFilterChange = (value) => {
+      rtcModelForm.value.rtcValue = value;
+      if(value == 'cost'){
+        getRtcMCost()
+      }else{
+
+      }
+    }
+
     // rtc消耗配置
     const setRtcModal = () => {
-      showRtcModal.value = true
-      rtcModelForm.value.quantity = 25;
+      getRtcMCost()
+    }
+
+    // 获取当前rtc每分钟费用
+    const getRtcMCost = async () => {
+      // 打开加载中loading
+      proxy.$mainStore.setAllLoading(true);
+      await axiosService.get('master-rtc-m-cost',{})
+      .then(response => {
+          if(response.code == 0){
+              showRtcModal.value = true
+              rtcModelForm.value.quantity = response.data.rtc_m_cost;
+          }else{
+              tipsForLogin(response.code,response.message)
+          }
+          proxy.$mainStore.setAllLoading(false);
+      })
+    }
+
+    // 保存当前rtc配置
+    const submitRtcMCost = async () => {
+      // 打开加载中loading
+      proxy.$mainStore.setAllLoading(true);
+      if(rtcModelForm.value.rtcValue == 'cost'){
+        // rtc扣点
+        await axiosService.post('master-rtc-m-cost',{
+          rtc_m_cost:rtcModelForm.value.quantity
+        })
+        .then(response => {
+            if(response.code == 0){
+                showRtcModal.value = false
+                dialog.success({
+                  title: "配置成功",
+                  positiveText: "关闭"
+                });
+            }else{
+                tipsForLogin(response.code,response.message)
+            }
+            proxy.$mainStore.setAllLoading(false);
+        })
+      }else{
+        // pat令牌
+      }
+      
     }
 
     const showUpdateModal = ref(false)
@@ -310,15 +374,46 @@
 
     //更新模型自建
     const updateModal = () => {
-      showUpdateModal.value = true
+      getModelInfo()
+    }
+
+    // 获取更新模型的初始化信息
+    const getModelInfo = async () => {
+      // 打开加载中loading
+      proxy.$mainStore.setAllLoading(true);
+      await axiosService.get('master-model-update',{})
+      .then(response => {
+          if(response.code == 0){
+              showUpdateModal.value = true
+              updateModelForm.value.updateDatetime = response.data.user_agent_update_check;
+              updateModelForm.value.modalId = response.data.user_agent_update_model_id;
+          }else{
+              tipsForLogin(response.code,response.message)
+          }
+          proxy.$mainStore.setAllLoading(false);
+      })
     }
 
     // 模型设置提交
-    const modalSubmit = (type) => {
-      // 保存
-      if(type == 'keep'){}
-      // 更新
-      if(type == 'update'){}
+    const modalSubmit = async (type) => {
+      // 打开加载中loading
+      proxy.$mainStore.setAllLoading(true);
+      await axiosService.post('master-model-update',{
+        user_agent_update_check:updateModelForm.value.updateDatetime,
+        user_agent_update_model_id:updateModelForm.value.modalId
+      })
+      .then(response => {
+          if(response.code == 0){
+              showUpdateModal.value = false
+              dialog.success({
+                title: "配置成功",
+                positiveText: "关闭"
+              });
+          }else{
+              tipsForLogin(response.code,response.message)
+          }
+          proxy.$mainStore.setAllLoading(false);
+      })
       console.log(updateModelForm.value.updateDatetime)
     }
 
@@ -584,7 +679,7 @@
             <Setting />
           </n-icon>
         </template>
-        RTC 统一设置
+        RTC 设置
       </n-button>
       <n-button class="action-btn" @click="updateModal">
         <template #icon>
@@ -773,7 +868,7 @@
   <n-modal v-model:show="showRtcModal" :auto-focus="false">
     <n-card
       style="width: 600px"
-      title="配置RTC耗点"
+      title="配置RTC"
       :bordered="false"
       size="huge"
       role="dialog"
@@ -792,14 +887,27 @@
           maxWidth: '580px',
         }"
       >
-        <n-form-item :label="`RTC资源点消耗「${rtcModelForm.quantity}」`" path="quantity">
+        <n-form-item label="配置项">
+          <n-select
+            class="filter-select"
+            :value="rtcModelForm.rtcValue"
+            :options="rtcOptions"
+            @update:value="rtcHandleFilterChange"
+            style="width: 100%;border: 1px solid #e5e7eb;border-radius: 6px;"
+            placeholder="请选择要配置的选项"
+          />
+        </n-form-item>
+        <n-form-item v-if="rtcModelForm.rtcValue == 'cost' " :label="`RTC资源点消耗「${rtcModelForm.quantity}」`" path="quantity">
             <n-slider :tooltip="false" v-model:value="rtcModelForm.quantity" :step="1"/>
+        </n-form-item>
+        <n-form-item v-if="rtcModelForm.rtcValue == 'pat' " label="PAT令牌" path="pat">
+            <n-input v-model:value="rtcModelForm.pat" type="text" placeholder="请输入PAT令牌" />
         </n-form-item>
       
       </n-form>
       <template #footer>
         <n-flex justify="space-around" size="large">
-          <n-button type="primary">保存</n-button>
+          <n-button type="primary" @click="submitRtcMCost">保存</n-button>
         </n-flex>
       </template>
     </n-card>
@@ -845,8 +953,7 @@
       <template #footer>
         <n-flex justify="end" size="large">
           <n-button @click="showUpdateModal = false">取消</n-button>
-          <n-button type="primary" @click="modalSubmit('keep')">保存</n-button>
-          <n-button type="info" @click="modalSubmit('update')">保存并更新</n-button>
+          <n-button type="primary" @click="modalSubmit">保存</n-button>
         </n-flex>
       </template>
     </n-card>

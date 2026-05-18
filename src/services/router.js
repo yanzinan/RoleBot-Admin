@@ -4,8 +4,9 @@ import MainLayout from '../views/Mainlayout.vue'
 import Agent from '../views/main/Agent.vue';
 import Logout from '../views/main/Logout.vue';
 import Change from '../views/main/Change.vue'
-
-
+import Member from '../views/main/Member.vue'
+import Point from '../views/main/Point.vue'
+import Other from '../views/main/Other.vue'
 
 const routes = [
     {
@@ -16,6 +17,21 @@ const routes = [
                 path: '',
                 name: 'Agent',
                 component: Agent,
+            },
+            {
+                path: '/member',
+                name: 'Member',
+                component: Member,
+            },
+            {
+                path: '/point',
+                name: 'Point',
+                component: Point,
+            },
+            {
+                path: '/other',
+                name: 'Other',
+                component: Other,
             },
             {
                 path: 'logout',

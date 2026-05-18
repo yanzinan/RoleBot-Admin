@@ -11,13 +11,15 @@ import {
     NLayoutContent,
     NLayoutFooter,
     NIcon,
-    
  } from "naive-ui";
 import {
     Robot,
     Me,
     Logout,
     ElectronicDoorLock,
+    LightMember,
+    Diamonds,
+    SettingConfig,
 } from "@icon-park/vue-next"
 
 
@@ -38,6 +40,15 @@ const loginStaff = ref("Me▾")
 const menuOptions = ref([
     {
         label: () => h(RouterLink, {to:{name:"Agent",params:{}}},{default:()=>'Agent'}),key:"agent",icon:renderIcon(Robot)
+    },
+    {
+        label: () => h(RouterLink, {to:{name:"Member",params:{}}},{default:()=>'Member'}),key:"member",icon:renderIcon(LightMember)
+    },
+    {
+        label: () => h(RouterLink, {to:{name:"Point",params:{}}},{default:()=>'Point'}),key:"point",icon:renderIcon(Diamonds)
+    },
+    {
+        label: () => h(RouterLink, {to:{name:"Other",params:{}}},{default:()=>'Other'}),key:"other",icon:renderIcon(SettingConfig)
     },
     {
         label: loginStaff.value,

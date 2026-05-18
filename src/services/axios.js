@@ -11,7 +11,9 @@ const apiUrls = {
   'admin-login':'/api/v1/admin/login',
   'voice-list':'/api/v1/voice/list',
   'agent-list':'/api/v1/agent/list',
-  'agent-delete':'/api/v1/agent/delete'
+  'agent-delete':'/api/v1/agent/delete',
+  'master-rtc-m-cost':'/api/v1/master/rtc-m-cost',
+  'master-model-update':'/api/v1/master/model-update',
 };
 
 export function useAxios() {
