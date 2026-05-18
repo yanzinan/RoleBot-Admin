@@ -22,7 +22,7 @@ const apiUrls = {
 export function useAxios() {
   // 统一添加token到请求头
   const addTokenToHeader = (config) => {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('token') ? localStorage.getItem('token') : '';
     if (token) {
       config.headers['token'] = token;
     }
