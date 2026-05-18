@@ -47,16 +47,6 @@
     // 弹窗实例
     const dialog = useDialog()
 
-    const memberOrder = ref({
-        yearly_member_fee:null,
-        quarterly_member_fee:null,
-        monthly_member_fee:null,
-        yearly_member_bonus_point:null,
-        quarterly_member_bonus_point:null,
-        monthly_member_bonus_point:null,
-        guest_bonus_point:null,
-    })
-
     //global init
     onMounted(() => {
       
@@ -65,21 +55,7 @@
 </script>
 
 <template>
-    <n-flex justify="center" style="margin-top:30px">
-        <n-form
-            :model="memberOrder"
-            label-placement="top"
-            :label-width="160"
-            :style="{
-                width: '600px',
-            }"
-        >
-            <n-form-item label="年度会员费用" path="yearly_member_fee">
-                <n-input-number style="width:100%" v-model:value="memberOrder.yearly_member_fee" clearable min="1"/>
-            </n-form-item>
-        
-        </n-form>
-    </n-flex>
+    
 </template>
 
 <style scoped>

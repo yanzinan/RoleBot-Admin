@@ -320,7 +320,10 @@
 
     // rtc消耗配置
     const setRtcModal = () => {
-      getRtcMCost()
+      rtcModelForm.value.quantity = 0;
+      rtcModelForm.value.rtcValue = null;
+      rtcModelForm.value.pat = null;
+      showRtcModal.value = true
     }
 
     // 获取当前rtc每分钟费用
@@ -330,7 +333,6 @@
       await axiosService.get('master-rtc-m-cost',{})
       .then(response => {
           if(response.code == 0){
-              showRtcModal.value = true
               rtcModelForm.value.quantity = response.data.rtc_m_cost;
           }else{
               tipsForLogin(response.code,response.message)
@@ -340,29 +342,73 @@
     }
 
     // 保存当前rtc配置
-    const submitRtcMCost = async () => {
-      // 打开加载中loading
-      proxy.$mainStore.setAllLoading(true);
-      if(rtcModelForm.value.rtcValue == 'cost'){
-        // rtc扣点
-        await axiosService.post('master-rtc-m-cost',{
-          rtc_m_cost:rtcModelForm.value.quantity
+    const submitRtcMConfig = () => {
+      if(rtcModelForm.value.rtcValue == 'cost' && !rtcModelForm.value.quantity){
+        dialog.warning({
+            title: '提示',
+            content: '请设置RTC资源点消耗。',
+            negativeText: '关闭'
         })
-        .then(response => {
-            if(response.code == 0){
-                showRtcModal.value = false
-                dialog.success({
-                  title: "配置成功",
-                  positiveText: "关闭"
-                });
-            }else{
-                tipsForLogin(response.code,response.message)
-            }
-            proxy.$mainStore.setAllLoading(false);
-        })
-      }else{
-        // pat令牌
+        return false
       }
+
+      if(rtcModelForm.value.rtcValue == 'pat' && !rtcModelForm.value.pat){
+        dialog.warning({
+            title: '提示',
+            content: '请输入PAT令牌。',
+            negativeText: '关闭'
+        })
+        return false
+      }
+      // 保存：弹出二次确认框
+      dialog.warning({
+          title: '确认保存',
+          content: '该操作有一定风险，保存后会覆盖原有数据，请再次确认是否要保存。',
+          positiveText: '保存',
+          negativeText: '取消',
+          onPositiveClick: () => {
+              // 打开加载中loading
+              proxy.$mainStore.setAllLoading(true);
+              if(rtcModelForm.value.rtcValue == 'cost'){
+                // rtc扣点
+                axiosService.post('master-rtc-m-cost-save',{
+                  rtc_m_cost:rtcModelForm.value.quantity
+                })
+                .then(response => {
+                    if(response.code == 0){
+                        showRtcModal.value = false
+                        dialog.success({
+                          title: "配置成功",
+                          positiveText: "关闭"
+                        });
+                    }else{
+                        tipsForLogin(response.code,response.message)
+                    }
+                    proxy.$mainStore.setAllLoading(false);
+                })
+              }else{
+                // pat令牌
+                axiosService.post('master-rtc-pat-save',{
+                  rtc_pat:rtcModelForm.value.pat
+                })
+                .then(response => {
+                    if(response.code == 0){
+                        showRtcModal.value = false
+                        dialog.success({
+                          title: "配置成功",
+                          positiveText: "关闭"
+                        });
+                    }else{
+                        tipsForLogin(response.code,response.message)
+                    }
+                    proxy.$mainStore.setAllLoading(false);
+                })
+              }
+          },
+          onNegativeClick: () => {
+              console.log('取消删除')
+          }
+      })
       
     }
 
@@ -396,25 +442,55 @@
 
     // 模型设置提交
     const modalSubmit = async (type) => {
-      // 打开加载中loading
-      proxy.$mainStore.setAllLoading(true);
-      await axiosService.post('master-model-update',{
-        user_agent_update_check:updateModelForm.value.updateDatetime,
-        user_agent_update_model_id:updateModelForm.value.modalId
-      })
-      .then(response => {
-          if(response.code == 0){
-              showUpdateModal.value = false
-              dialog.success({
-                title: "配置成功",
-                positiveText: "关闭"
-              });
-          }else{
-              tipsForLogin(response.code,response.message)
+      if(!updateModelForm.value.updateDatetime){
+        dialog.warning({
+            title: '提示',
+            content: '请设置更新边界。',
+            negativeText: '关闭'
+        })
+        return false
+      }
+
+      if(!updateModelForm.value.modalId){
+        dialog.warning({
+            title: '提示',
+            content: '请输入模型ID。',
+            negativeText: '关闭'
+        })
+        return false
+      }
+
+      // 保存：弹出二次确认框
+      dialog.warning({
+          title: '确认保存',
+          content: '该操作有一定风险，保存后会覆盖原有数据，请再次确认是否要保存。',
+          positiveText: '保存',
+          negativeText: '取消',
+          onPositiveClick: () => {
+            // 打开加载中loading
+            proxy.$mainStore.setAllLoading(true);
+            axiosService.post('master-model-update-save',{
+              user_agent_update_check:updateModelForm.value.updateDatetime,
+              user_agent_update_model_id:updateModelForm.value.modalId
+            })
+            .then(response => {
+                if(response.code == 0){
+                    showUpdateModal.value = false
+                    dialog.success({
+                      title: "配置成功",
+                      positiveText: "关闭"
+                    });
+                }else{
+                    tipsForLogin(response.code,response.message)
+                }
+                proxy.$mainStore.setAllLoading(false);
+            })
+          },
+          onNegativeClick: () => {
+              console.log('取消删除')
           }
-          proxy.$mainStore.setAllLoading(false);
       })
-      console.log(updateModelForm.value.updateDatetime)
+
     }
 
     // 把url转成文件
@@ -897,8 +973,8 @@
             placeholder="请选择要配置的选项"
           />
         </n-form-item>
-        <n-form-item v-if="rtcModelForm.rtcValue == 'cost' " :label="`RTC资源点消耗「${rtcModelForm.quantity}」`" path="quantity">
-            <n-slider :tooltip="false" v-model:value="rtcModelForm.quantity" :step="1"/>
+        <n-form-item v-if="rtcModelForm.rtcValue == 'cost' " label="RTC资源点消耗" path="quantity">
+            <n-slider show-tooltip v-model:value="rtcModelForm.quantity" :step="1"/>
         </n-form-item>
         <n-form-item v-if="rtcModelForm.rtcValue == 'pat' " label="PAT令牌" path="pat">
             <n-input v-model:value="rtcModelForm.pat" type="text" placeholder="请输入PAT令牌" />
@@ -907,7 +983,7 @@
       </n-form>
       <template #footer>
         <n-flex justify="space-around" size="large">
-          <n-button type="primary" @click="submitRtcMCost">保存</n-button>
+          <n-button type="primary" @click="submitRtcMConfig">保存</n-button>
         </n-flex>
       </template>
     </n-card>

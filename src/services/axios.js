@@ -14,6 +14,9 @@ const apiUrls = {
   'agent-delete':'/api/v1/agent/delete',
   'master-rtc-m-cost':'/api/v1/master/rtc-m-cost',
   'master-model-update':'/api/v1/master/model-update',
+  'master-rtc-m-cost-save':'/api/v1/master/rtc-m-cost/save',
+  'master-rtc-pat-save':'/api/v1/master/rtc-pat/save',
+  'master-model-update-save':'/api/v1/master/model-update/save',
 };
 
 export function useAxios() {
