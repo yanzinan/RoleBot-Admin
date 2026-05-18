@@ -1,6 +1,9 @@
 {
     "rewrites": [
-      { "source": "/(.*)", "destination": "/index.html" }
+      {
+        "source": "/api/:match*",
+        "destination": "http://www.kaoiki.com:8080"
+      }
     ],
     "cleanUrls": true,
     "trailingSlash": false
