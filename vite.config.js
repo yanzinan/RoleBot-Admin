@@ -4,13 +4,10 @@ import vue from '@vitejs/plugin-vue'
 
 // https://vitejs.dev/config/
 export default defineConfig(({ command, mode }) => {  
-  // 加载环境变量文件  
-  const env = loadEnv(mode, process.cwd())
-
+  
   // 使用加载的环境变量进行配置  
   return {  
     // ... 其他配置项  
-    // base: env.VITE_BASE_URL, // 设置 publicPath 
     base:'/',
     plugins: [vue()],
     // vite2.x
