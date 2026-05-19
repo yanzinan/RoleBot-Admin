@@ -314,7 +314,7 @@
       if(value == 'cost'){
         getRtcMCost()
       }else{
-
+        getRtcPat()
       }
     }
 
@@ -334,6 +334,21 @@
       .then(response => {
           if(response.code == 0){
               rtcModelForm.value.quantity = response.data.rtc_m_cost;
+          }else{
+              tipsForLogin(response.code,response.message)
+          }
+          proxy.$mainStore.setAllLoading(false);
+      })
+    }
+
+    // 获取当前rtc的pat令牌
+    const getRtcPat = async () =>{
+      // 打开加载中loading
+      proxy.$mainStore.setAllLoading(true);
+      await axiosService.get('master-rtc-pat',{})
+      .then(response => {
+          if(response.code == 0){
+              rtcModelForm.value.pat = response.data.rtc_pat;
           }else{
               tipsForLogin(response.code,response.message)
           }

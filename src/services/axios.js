@@ -17,6 +17,11 @@ const apiUrls = {
   'master-rtc-m-cost-save':'/api/v1/master/rtc-m-cost/save',
   'master-rtc-pat-save':'/api/v1/master/rtc-pat/save',
   'master-model-update-save':'/api/v1/master/model-update/save',
+  'master-point-package':'/api/v1/master/point-package',
+  'master-others':'/api/v1/master/others',
+  'master-others-save':'/api/v1/master/others/save',
+  'master-rtc-pat':'/api/v1/master/rtc-pat',
+  'master-point-package-save':'/api/v1/master/point-package/save',
 };
 
 export function useAxios() {
