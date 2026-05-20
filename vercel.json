@@ -2,7 +2,7 @@
     "rewrites": [
       {
         "source": "/api/:match*",
-        "destination": "http://www.kaoiki.com:8080/api/:match*"
+        "destination": "http://www.kaoiki.com:8080/:match*"
       }
     ],
     "cleanUrls": true,
