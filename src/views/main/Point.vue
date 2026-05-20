@@ -135,41 +135,41 @@
         }
 
         // 保存：弹出二次确认框
-      dialog.warning({
-          title: '确认保存',
-          content: '该操作有一定风险，保存后会覆盖原有数据，请再次确认是否要保存。',
-          positiveText: '保存',
-          negativeText: '取消',
-          onPositiveClick: () => {
-            // 打开加载中loading
-            proxy.$mainStore.setAllLoading(true);
-            axiosService.post('master-point-package-save',{
-              point_6000_fee:pointOrder.value.point_6000_fee,
-              point_6000_value:pointOrder.value.point_6000_value,
-              point_12000_fee:pointOrder.value.point_12000_fee,
-              point_12000_value:pointOrder.value.point_12000_value,
-              point_30000_fee:pointOrder.value.point_30000_fee,
-              point_30000_value:pointOrder.value.point_30000_value,
-              point_68000_fee:pointOrder.value.point_68000_fee,
-              point_68000_value:pointOrder.value.point_68000_value
-            })
-            .then(response => {
-                if(response.code == 0){
-                    getPointPackage()
-                    dialog.success({
-                      title: "配置成功",
-                      positiveText: "关闭"
-                    });
-                }else{
-                    tipsForLogin(response.code,response.message)
-                }
-                proxy.$mainStore.setAllLoading(false);
-            })
-          },
-          onNegativeClick: () => {
-              console.log('取消删除')
-          }
-      })
+        dialog.warning({
+            title: '确认保存',
+            content: '该操作有一定风险，保存后会覆盖原有数据，请再次确认是否要保存。',
+            positiveText: '保存',
+            negativeText: '取消',
+            onPositiveClick: () => {
+                // 打开加载中loading
+                proxy.$mainStore.setAllLoading(true);
+                axiosService.post('master-point-package-save',{
+                point_6000_fee:pointOrder.value.point_6000_fee,
+                point_6000_value:pointOrder.value.point_6000_value,
+                point_12000_fee:pointOrder.value.point_12000_fee,
+                point_12000_value:pointOrder.value.point_12000_value,
+                point_30000_fee:pointOrder.value.point_30000_fee,
+                point_30000_value:pointOrder.value.point_30000_value,
+                point_68000_fee:pointOrder.value.point_68000_fee,
+                point_68000_value:pointOrder.value.point_68000_value
+                })
+                .then(response => {
+                    if(response.code == 0){
+                        getPointPackage()
+                        dialog.success({
+                        title: "配置成功",
+                        positiveText: "关闭"
+                        });
+                    }else{
+                        tipsForLogin(response.code,response.message)
+                    }
+                    proxy.$mainStore.setAllLoading(false);
+                })
+            },
+            onNegativeClick: () => {
+                console.log('取消删除')
+            }
+        })
     }
 
     //global init

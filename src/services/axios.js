@@ -22,6 +22,10 @@ const apiUrls = {
   'master-others-save':'/api/v1/master/others/save',
   'master-rtc-pat':'/api/v1/master/rtc-pat',
   'master-point-package-save':'/api/v1/master/point-package/save',
+  "master-member-fee-bonus":"/api/v1/master/member-fee-bonus",
+  "master-member-fee-bonus-save":"/api/v1/master/member-fee-bonus/save",
+  "master-report-usage-count":"/api/v1/master/report-usage-count",
+  "master-report-usage-count-save":"/api/v1/master/report-usage-count/save",
 };
 
 export function useAxios() {
