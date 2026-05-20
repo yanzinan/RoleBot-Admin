@@ -26,6 +26,10 @@ const apiUrls = {
   "master-member-fee-bonus-save":"/api/v1/master/member-fee-bonus/save",
   "master-report-usage-count":"/api/v1/master/report-usage-count",
   "master-report-usage-count-save":"/api/v1/master/report-usage-count/save",
+  "point-consume-resource-upload":"/api/v1/point/consume-resource/upload",
+  "other-share-upload":"/api/v1/other/share/upload",
+  "other-official-account-upload":"/api/v1/other/official-account/upload",
+  "other-article-upload":"/api/v1/other/article/upload",
 };
 
 export function useAxios() {

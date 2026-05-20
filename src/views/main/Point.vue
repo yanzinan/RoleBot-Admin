@@ -45,7 +45,7 @@
     // 打开资源点消耗说明的上传弹窗
     const uploadCostPoint = () => {
         uploadCostPointModal.value = true;
-        let url = proxy.$mainStore.baseUrl + '/rolebot/mini_program/generic/cost-point.jpg'
+        let url = proxy.$mainStore.baseUrl + '/rolebot/mini_program/generic/cost-point.jpg?v=' + new Date().getTime()
         urlToFile(url,'cost-point.jpg').then(file => {
             costPointList.value = [];
             costPointList.value.push({
@@ -172,6 +172,48 @@
         })
     }
 
+    // 上传资源点消耗说明图片
+    const pointResourceUpload = () => {
+        if(costPointList.value.length == 0){
+            dialog.warning({
+                title: '提示',
+                content: '请上传图片。',
+                negativeText: '关闭'
+            })
+            return false
+        }
+
+        // 保存：弹出二次确认框
+        dialog.warning({
+            title: '确认保存',
+            content: '该操作有一定风险，保存后会覆盖原有图片，请再次确认是否要保存。',
+            positiveText: '保存',
+            negativeText: '取消',
+            onPositiveClick: () => {
+                // 打开加载中loading
+                proxy.$mainStore.setAllLoading(true);
+                const formData = new FormData()
+                formData.append("file",costPointList.value[0].file)
+                axiosService.post('point-consume-resource-upload',formData)
+                .then(response => {
+                    if(response.code == 0){
+                        uploadCostPointModal.value = false
+                        dialog.success({
+                            title: "配置成功",
+                            positiveText: "关闭"
+                        });
+                    }else{
+                        tipsForLogin(response.code,response.message)
+                    }
+                    proxy.$mainStore.setAllLoading(false);
+                })
+            },
+            onNegativeClick: () => {
+                console.log('取消删除')
+            }
+        })
+    }
+
     //global init
     onMounted(() => {
       getPointPackage()
@@ -255,7 +297,7 @@
             maxWidth: '580px',
             }"
         >
-            <n-form-item label="图片替换">
+            <n-form-item label="图片替换（限制jpg）">
               <n-upload
                 v-model:file-list="costPointList"
                 accept="image/jpg"
@@ -271,7 +313,7 @@
         <template #footer>
             <n-flex justify="end" size="large">
             <n-button @click="uploadCostPointModal = false">取消</n-button>
-            <n-button type="primary" @click="modalSubmit">保存</n-button>
+            <n-button type="primary" @click="pointResourceUpload">保存</n-button>
             </n-flex>
         </template>
         </n-card>

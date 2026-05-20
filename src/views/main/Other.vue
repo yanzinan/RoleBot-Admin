@@ -48,7 +48,7 @@
     const shareList = ref([])
     const inviteFriends = () => {
         inviteFriendsModal.value = true;
-        let url = proxy.$mainStore.baseUrl + '/rolebot/mini_program/share/share.jpg'
+        let url = proxy.$mainStore.baseUrl + '/rolebot/mini_program/share/share.jpg?v=' + new Date().getTime()
         urlToFile(url,'share.jpg').then(file => {
             shareList.value = [];
             shareList.value.push({
@@ -77,7 +77,7 @@
     const imageTypeHandleFilterChange = (value) => {
         imageType.value = value
         if(value == 'official_account'){
-            let url = proxy.$mainStore.baseUrl + '/rolebot/mini_program/generic/official_account.png'
+            let url = proxy.$mainStore.baseUrl + '/rolebot/mini_program/generic/official_account.png?v=' + new Date().getTime()
             urlToFile(url,'official_account.png').then(file => {
                 officialAccountList.value = [];
                 officialAccountList.value.push({
@@ -87,7 +87,7 @@
                 })
             })
         }else{
-            let url = proxy.$mainStore.baseUrl + '/rolebot/mini_program/generic/article.png'
+            let url = proxy.$mainStore.baseUrl + '/rolebot/mini_program/generic/article.png?v=' + new Date().getTime()
             urlToFile(url,'article.png').then(file => {
                 articleList.value = [];
                 articleList.value.push({
@@ -100,6 +100,7 @@
     }
     const roleBotIntroduction = () => {
         roleBotIntroductionModal.value = true
+        imageType.value = null;
     }
 
     // 把url转成文件
@@ -255,6 +256,135 @@
       }
     };
 
+    // 邀请好友图片上传
+    const inviteFriendUpload = () => {
+        if(shareList.value.length == 0){
+            dialog.warning({
+                title: '提示',
+                content: '请上传图片。',
+                negativeText: '关闭'
+            })
+            return false
+        }
+
+        // 保存：弹出二次确认框
+        dialog.warning({
+            title: '确认保存',
+            content: '该操作有一定风险，保存后会覆盖原有图片，请再次确认是否要保存。',
+            positiveText: '保存',
+            negativeText: '取消',
+            onPositiveClick: () => {
+                // 打开加载中loading
+                proxy.$mainStore.setAllLoading(true);
+                const formData = new FormData()
+                formData.append("file",shareList.value[0].file)
+                axiosService.post('other-share-upload',formData)
+                .then(response => {
+                    if(response.code == 0){
+                        inviteFriendsModal.value = false
+                        dialog.success({
+                            title: "配置成功",
+                            positiveText: "关闭"
+                        });
+                    }else{
+                        tipsForLogin(response.code,response.message)
+                    }
+                    proxy.$mainStore.setAllLoading(false);
+                })
+            },
+            onNegativeClick: () => {
+                console.log('取消删除')
+            }
+        })
+    }
+
+    // 萝卜AI简介上传图片
+    const roleBotIntroductionUpload = () => {
+        // 上传公众号
+        if(imageType.value == 'official_account'){
+            if(officialAccountList.value.length == 0){
+                dialog.warning({
+                    title: '提示',
+                    content: '请上传图片。',
+                    negativeText: '关闭'
+                })
+                return false
+            }
+
+            // 保存：弹出二次确认框
+            dialog.warning({
+                title: '确认保存',
+                content: '该操作有一定风险，保存后会覆盖原有图片，请再次确认是否要保存。',
+                positiveText: '保存',
+                negativeText: '取消',
+                onPositiveClick: () => {
+                    // 打开加载中loading
+                    proxy.$mainStore.setAllLoading(true);
+                    const formData = new FormData()
+                    formData.append("file",officialAccountList.value[0].file)
+                    axiosService.post('other-official-account-upload',formData)
+                    .then(response => {
+                        if(response.code == 0){
+                            roleBotIntroductionModal.value = false
+                            dialog.success({
+                                title: "配置成功",
+                                positiveText: "关闭"
+                            });
+                        }else{
+                            tipsForLogin(response.code,response.message)
+                        }
+                        proxy.$mainStore.setAllLoading(false);
+                    })
+                },
+                onNegativeClick: () => {
+                    console.log('取消删除')
+                }
+            })
+        }
+
+        // 上传文章封面
+        if(imageType.value == 'article'){
+            if(articleList.value.length == 0){
+                dialog.warning({
+                    title: '提示',
+                    content: '请上传图片。',
+                    negativeText: '关闭'
+                })
+                return false
+            }
+
+            // 保存：弹出二次确认框
+            dialog.warning({
+                title: '确认保存',
+                content: '该操作有一定风险，保存后会覆盖原有图片，请再次确认是否要保存。',
+                positiveText: '保存',
+                negativeText: '取消',
+                onPositiveClick: () => {
+                    // 打开加载中loading
+                    proxy.$mainStore.setAllLoading(true);
+                    const formData = new FormData()
+                    formData.append("file",articleList.value[0].file)
+                    axiosService.post('other-article-upload',formData)
+                    .then(response => {
+                        if(response.code == 0){
+                            roleBotIntroductionModal.value = false
+                            dialog.success({
+                                title: "配置成功",
+                                positiveText: "关闭"
+                            });
+                        }else{
+                            tipsForLogin(response.code,response.message)
+                        }
+                        proxy.$mainStore.setAllLoading(false);
+                    })
+                },
+                onNegativeClick: () => {
+                    console.log('取消删除')
+                }
+            })
+        }
+    }
+
     //global init
     onMounted(() => {
       getPointPackage()
@@ -342,7 +472,7 @@
             maxWidth: '580px',
             }"
         >
-            <n-form-item label="图片替换">
+            <n-form-item label="图片替换（限制jpg）">
               <n-upload
                 v-model:file-list="shareList"
                 accept="image/jpg"
@@ -358,74 +488,74 @@
         <template #footer>
             <n-flex justify="end" size="large">
             <n-button @click="inviteFriendsModal = false">取消</n-button>
-            <n-button type="primary" @click="modalSubmit">保存</n-button>
+            <n-button type="primary" @click="inviteFriendUpload">保存</n-button>
             </n-flex>
         </template>
         </n-card>
     </n-modal>
     <!-- 萝卜AI简介图片替换 -->
     <n-modal v-model:show="roleBotIntroductionModal" :auto-focus="false">
-    <n-card
-      style="width: 600px"
-      title="萝卜AI伙伴简介"
-      :bordered="false"
-      size="huge"
-      role="dialog"
-      aria-modal="true"
-    >
-      <template #header-extra>
-        <n-icon size="25px" @click="roleBotIntroductionModal=false;">
-          <CloseOne/>
-        </n-icon>
-      </template>
-      <n-form
-        label-placement="top"
-        :label-width="160"
-        :style="{
-          maxWidth: '580px',
-        }"
-      >
-        <n-form-item label="配置项">
-          <n-select
-            class="filter-select"
-            :value="imageType"
-            :options="imageTypeOptions"
-            @update:value="imageTypeHandleFilterChange"
-            style="width: 100%;border: 1px solid #e5e7eb;border-radius: 6px;"
-            placeholder="请选择要配置的选项"
-          />
-        </n-form-item>
-        <n-form-item label="图片替换" v-if="imageType == 'official_account' ">
-            <n-upload
-            v-model:file-list="officialAccountList"
-            accept="image/png"
-            list-type="image-card"
-            :multiple="false"
-            :max="1"
-            >
-            点击上传
-            </n-upload>
-        </n-form-item>
-        <n-form-item label="图片替换" v-if="imageType == 'article' ">
-            <n-upload
-            v-model:file-list="articleList"
-            accept="image/png"
-            list-type="image-card"
-            :multiple="false"
-            :max="1"
-            >
-            点击上传
-            </n-upload>
-        </n-form-item>
-        
-      </n-form>
-      <template #footer>
-        <n-flex justify="space-around" size="large">
-          <n-button type="primary" @click="submitRtcMConfig">保存</n-button>
-        </n-flex>
-      </template>
-    </n-card>
-  </n-modal>
+        <n-card
+        style="width: 600px"
+        title="萝卜AI伙伴简介"
+        :bordered="false"
+        size="huge"
+        role="dialog"
+        aria-modal="true"
+        >
+        <template #header-extra>
+            <n-icon size="25px" @click="roleBotIntroductionModal=false;">
+            <CloseOne/>
+            </n-icon>
+        </template>
+        <n-form
+            label-placement="top"
+            :label-width="160"
+            :style="{
+            maxWidth: '580px',
+            }"
+        >
+            <n-form-item label="配置项">
+            <n-select
+                class="filter-select"
+                :value="imageType"
+                :options="imageTypeOptions"
+                @update:value="imageTypeHandleFilterChange"
+                style="width: 100%;border: 1px solid #e5e7eb;border-radius: 6px;"
+                placeholder="请选择要配置的选项"
+            />
+            </n-form-item>
+            <n-form-item label="图片替换（限制png）" v-if="imageType == 'official_account' ">
+                <n-upload
+                v-model:file-list="officialAccountList"
+                accept="image/png"
+                list-type="image-card"
+                :multiple="false"
+                :max="1"
+                >
+                点击上传
+                </n-upload>
+            </n-form-item>
+            <n-form-item label="图片替换（限制png）" v-if="imageType == 'article' ">
+                <n-upload
+                v-model:file-list="articleList"
+                accept="image/png"
+                list-type="image-card"
+                :multiple="false"
+                :max="1"
+                >
+                点击上传
+                </n-upload>
+            </n-form-item>
+            
+        </n-form>
+        <template #footer>
+            <n-flex justify="space-around" size="large">
+            <n-button type="primary" @click="roleBotIntroductionUpload">保存</n-button>
+            </n-flex>
+        </template>
+        </n-card>
+    </n-modal>
 </template>
 
 <style scoped>
