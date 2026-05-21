@@ -274,6 +274,7 @@
     const createAgent = () => {
       showAgentModal.value=true;
       agentModalTitle.value='新建';
+      agentModelForm.value.agentId = null;
       agentModelForm.value.voiceId = null;
       agentModelForm.value.speed = null;
       agentModelForm.value.fileOrText = true;
@@ -654,6 +655,15 @@
       let openAudioTag = agentModelForm.value.fileOrText ? 'file' : 'text'
       formData.append('openAudioTag',openAudioTag)
       // 欢迎语
+      // 判断当前有没有角色故事 有角色故事必传欢迎语
+      if(agentModelForm.value.isRoleStory && welcomeAudioUrlList.value.length == 0){
+        dialog.warning({
+            title: '提示',
+            content: '请上传欢迎语',
+            negativeText: '关闭'
+        })
+        return false
+      }
       let welcomeAudioUrl = welcomeAudioUrlList.value.length > 0 ? welcomeAudioUrlList.value[0].file : null;
       formData.append('welcomeAudioUrl',welcomeAudioUrl)
       // 音色
@@ -713,8 +723,40 @@
       }
       // 资源点消耗
       formData.append('quantity',agentModelForm.value.quantity)
-      
-      
+      // agentId
+      if(agentModalTitle.value == '新建'){
+        formData.append('agentId',"")
+      }else if(agentModalTitle.value == '编辑'){
+        formData.append('agentId',agentModelForm.value.agentId)
+      }
+
+      // 保存：弹出二次确认框
+      dialog.warning({
+          title: '确认保存',
+          content: '您确定要进行保存操作吗？',
+          positiveText: '保存',
+          negativeText: '取消',
+          onPositiveClick: () => {
+              // 打开加载中loading
+              proxy.$mainStore.setAllLoading(true);
+              axiosService.post('agent-save',formData)
+              .then(response => {
+                  if(response.code == 0){
+                    showAgentModal.value=false;
+                    currentPage.value = 1;
+                    filterValue.value = '0'
+                    getAgentList()
+                      
+                  }else{
+                      tipsForLogin(response.code,response.message)
+                  }
+                  proxy.$mainStore.setAllLoading(false);
+              })
+          },
+          onNegativeClick: () => {
+              console.log('取消删除')
+          }
+      })
 
     }
 
@@ -806,7 +848,7 @@
         <div class="card-footer">
           <n-tag v-if="item.agentType == 0" type="info" size="small">官方</n-tag>
           <n-tag v-if="item.agentType == 1" type="primary" size="small">自建</n-tag>
-          <span class="update-time">更新于 {{item.updateDatetime.split("T")[0]}}</span>
+          <span class="update-time">更新于 {{item.updateDatetime ? item.updateDatetime.split("T")[0] : ''}}</span>
         </div>
       </div>
 
@@ -929,13 +971,13 @@
               <n-input-number v-model:value="agentModelForm.speed" clearable :precision="1" :min="1" placeholder="请设置语速" style="width:100%"/>
             </n-form-item>
             <n-form-item label="智能体名称" path="name">
-              <n-input v-model:value="agentModelForm.name" type="text" placeholder="请输入智能体名称" />
+              <n-input v-model:value="agentModelForm.name" type="text" clearable placeholder="请输入智能体名称" />
             </n-form-item>
             <n-form-item label="智能体摘要" path="digest">
-              <n-input v-model:value="agentModelForm.digest" type="text" placeholder="请输入智能体摘要" />
+              <n-input v-model:value="agentModelForm.digest" type="text" clearable placeholder="请输入智能体摘要" />
             </n-form-item>
             <n-form-item label="Bot Id" path="botId">
-              <n-input v-model:value="agentModelForm.botId" type="text" placeholder="请输入botId" />
+              <n-input v-model:value="agentModelForm.botId" type="text" clearable placeholder="请输入botId" />
             </n-form-item>
             <n-form-item label="资源点消耗" path="quantity">
               <n-slider show-tooltip v-model:value="agentModelForm.quantity" :step="1"/>

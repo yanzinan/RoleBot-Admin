@@ -30,6 +30,8 @@ const apiUrls = {
   "other-share-upload":"/api/v1/other/share/upload",
   "other-official-account-upload":"/api/v1/other/official-account/upload",
   "other-article-upload":"/api/v1/other/article/upload",
+  "agent-save":"/api/v1/agent/save",
+  "member-config-save":"/api/v1/member/config/save",
 };
 
 export function useAxios() {

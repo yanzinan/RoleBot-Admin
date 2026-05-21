@@ -86,16 +86,87 @@
     }
 
     const gracePeriodChange = (value) => {
-      if(value == true){
-        
-      }else{
-        
-      }
+        memberOrder.value.grace_period = value
+        if(value){
+            // 请求json 做回显
+        }else{
+            memberOrder.value.expiry_date = "";
+            memberOrder.value.yearly_member_fee_regular = "";
+            memberOrder.value.quarterly_member_fee_regular = "",
+            memberOrder.value.monthly_member_fee_regular = "";
+        }
     }
 
     // 生成配置
     const generateConfig = () => {
+        if(memberOrder.value.grace_period && !memberOrder.value.expiry_date){
+            dialog.warning({
+                title: '提示',
+                content: '请填写优惠价格截止日期。',
+                negativeText: '关闭'
+            })
+            return false
+        }
 
+        if(memberOrder.value.grace_period && !memberOrder.value.yearly_member_fee_regular){
+            dialog.warning({
+                title: '提示',
+                content: '请填写优惠前的年度会员定价。',
+                negativeText: '关闭'
+            })
+            return false
+        }
+
+        if(memberOrder.value.grace_period && !memberOrder.value.quarterly_member_fee_regular){
+            dialog.warning({
+                title: '提示',
+                content: '请填写优惠前的季度会员定价。',
+                negativeText: '关闭'
+            })
+            return false
+        }
+
+        if(memberOrder.value.grace_period && !memberOrder.value.monthly_member_fee_regular){
+            dialog.warning({
+                title: '提示',
+                content: '请填写优惠前的月度会员定价。',
+                negativeText: '关闭'
+            })
+            return false
+        }
+
+        // 保存：弹出二次确认框
+        dialog.warning({
+            title: '确认保存',
+            content: '保存当前配置会覆盖之前的数据，您确定要继续吗？',
+            positiveText: '保存',
+            negativeText: '取消',
+            onPositiveClick: () => {
+                // 打开加载中loading
+                proxy.$mainStore.setAllLoading(true);
+                axiosService.post('member-config-save',{
+                    gracePeriod:memberOrder.value.grace_period,
+                    expiryDate:memberOrder.value.expiry_date,
+                    yearlyMemberFeeRegular:memberOrder.value.yearly_member_fee_regular,
+                    quarterlyMemberFeeRegular:memberOrder.value.quarterly_member_fee_regular,
+                    monthlyMemberFeeRegular:memberOrder.value.monthly_member_fee_regular,
+                })
+                .then(response => {
+                    if(response.code == 0){
+                        // getMemberFeeBonus()
+                        // currentRef.value = 1
+                        jsonData.value = response.data
+                    }else{
+                        tipsForLogin(response.code,response.message)
+                    }
+                    proxy.$mainStore.setAllLoading(false);
+                })
+
+            },
+            onNegativeClick: () => {
+                console.log('取消删除')
+            }
+        })
     }
 
     const jsonData = ref({
@@ -467,7 +538,7 @@
               </n-switch>
             </n-form-item>
             <n-form-item v-if="memberOrder.grace_period" label="优惠价格截止日期" path="expiry_date">
-                <n-date-picker style="width:100%" v-model:value="memberOrder.expiry_date" type="datetime" value-format="yyyy-MM-dd HH:mm:ss"/>
+                <n-date-picker style="width:100%" v-model:formatted-value="memberOrder.expiry_date" type="datetime" value-format="yyyy-MM-dd HH:mm:ss"/>
             </n-form-item>
             <n-form-item v-if="memberOrder.grace_period" label="优惠前的年度会员定价" path="yearly_member_fee_regular">
                 <n-input-number style="width:100%" v-model:value="memberOrder.yearly_member_fee_regular" clearable min="1"/>
