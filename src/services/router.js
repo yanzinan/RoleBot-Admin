@@ -62,7 +62,7 @@ router.beforeEach((to, from, next) => {
     // 检查目标路由是否是登录页面
     if (to.name === 'Login') {
         // 如果用户已经登录，重定向到首页或其他默认页面
-        if (localStorage.getItem('Login')) {
+        if (localStorage.getItem('RoleBot-Admin-Login')) {
             next({ path: '/' }); // 通常首页的path为'/'
         } else {
             // 用户未登录，继续前往登录页面
@@ -70,7 +70,7 @@ router.beforeEach((to, from, next) => {
         }
     } else {
         // 如果目标不是登录页面，检查用户是否登录
-        if (!localStorage.getItem('Login')) {
+        if (!localStorage.getItem('RoleBot-Admin-Login')) {
             // 如果用户没有登录，重定向到登录页面
             next({ name: 'Login' });
         } else {

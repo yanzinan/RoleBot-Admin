@@ -47,7 +47,7 @@
             })
             .then(response => {
                 if(response.code == 0){
-                    localStorage.setItem("Login","True");
+                    localStorage.setItem("RoleBot-Admin-Login","True");
                     localStorage.setItem("username",response.data.username);
                     localStorage.setItem("id",response.data.id);
                     localStorage.setItem("RoleBot-Admin-Token",response.data.token);
