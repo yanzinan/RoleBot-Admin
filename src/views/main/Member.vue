@@ -1,7 +1,7 @@
 <script setup>
 
     //global init
-
+    import axios from 'axios'
     import { h, ref, onMounted,getCurrentInstance, computed  } from "vue"
     const { proxy } = getCurrentInstance()
     import { useRouter } from 'vue-router';
@@ -87,14 +87,10 @@
 
     const gracePeriodChange = (value) => {
         memberOrder.value.grace_period = value
-        if(value){
-            // 请求json 做回显
-        }else{
-            memberOrder.value.expiry_date = "";
-            memberOrder.value.yearly_member_fee_regular = "";
-            memberOrder.value.quarterly_member_fee_regular = "",
-            memberOrder.value.monthly_member_fee_regular = "";
-        }
+        memberOrder.value.expiry_date = null;
+        memberOrder.value.yearly_member_fee_regular = null;
+        memberOrder.value.quarterly_member_fee_regular = null,
+        memberOrder.value.monthly_member_fee_regular = null;
     }
 
     // 生成配置
@@ -147,15 +143,14 @@
                 axiosService.post('member-config-save',{
                     gracePeriod:memberOrder.value.grace_period,
                     expiryDate:memberOrder.value.expiry_date,
-                    yearlyMemberFeeRegular:memberOrder.value.yearly_member_fee_regular,
-                    quarterlyMemberFeeRegular:memberOrder.value.quarterly_member_fee_regular,
-                    monthlyMemberFeeRegular:memberOrder.value.monthly_member_fee_regular,
+                    yearlyMemberFeeRegular:memberOrder.value.yearly_member_fee_regular ? memberOrder.value.yearly_member_fee_regular : '',
+                    quarterlyMemberFeeRegular:memberOrder.value.quarterly_member_fee_regular ? memberOrder.value.quarterly_member_fee_regular : '',
+                    monthlyMemberFeeRegular:memberOrder.value.monthly_member_fee_regular ? memberOrder.value.monthly_member_fee_regular : '',
                 })
                 .then(response => {
                     if(response.code == 0){
-                        // getMemberFeeBonus()
-                        // currentRef.value = 1
-                        jsonData.value = response.data
+                        getMemberFeeBonus()
+                        currentRef.value = 1
                     }else{
                         tipsForLogin(response.code,response.message)
                     }
@@ -168,37 +163,6 @@
             }
         })
     }
-
-    const jsonData = ref({
-        "grace_period":true,
-        "member_activity_expiration_date":"2025-12-31 23:59:59",
-        "memberDetail":[
-        {
-            "memberType":"3",
-            "regularPrice":"￥189",
-            "salePrice":"￥139",
-            "packageId":"yearly_member"
-        },
-        {
-            "memberType":"2",
-            "regularPrice":"￥49",
-            "salePrice":"￥39",
-            "packageId":"quarterly_member"
-        },
-        {
-            "memberType":"1",
-            "regularPrice":"￥19",
-            "salePrice":"￥15",
-            "packageId":"monthly_member"
-        }
-        ],
-        "yearly_member_bonus_point":"120000",
-        "quarterly_member_bonus_point":"30000",
-        "monthly_member_bonus_point":"10000",
-        "yearly_member_report_count":"4",
-        "quarterly_member_report_count":"4",
-        "monthly_member_report_count":"2"
-    })
 
     const currentRef = ref(1);
     const currentStatusRef = ref("process");
@@ -353,6 +317,7 @@
                         if(response.code == 0){
                             getReportUsageCount()
                             currentRef.value = 3
+                            getStepData()
                         }else{
                             tipsForLogin(response.code,response.message)
                         }
@@ -373,11 +338,6 @@
         else if (currentRef.value === null)
             currentRef.value = 3;
         else currentRef.value--;
-    }
-
-    // 保存json
-    const submitConfig = () => {
-
     }
 
     // 获取会员和送点
@@ -418,6 +378,29 @@
             }
             proxy.$mainStore.setAllLoading(false);
         })
+    }
+
+    // 获取额外字段
+    const getStepData = async() => {
+        const url = proxy.$mainStore.baseUrl + '/rolebot/mini_program/master.json?v=' + new Date().getTime()
+        // 你的token值
+        const token = localStorage.getItem('RoleBot-Admin-Token')
+        // 打开加载中loading
+        proxy.$mainStore.setAllLoading(true);
+        try {
+            const res = await axios.get(url, {})
+            memberOrder.value.grace_period = JSON.parse(res.data.grace_period);
+            memberOrder.value.expiry_date = res.data.member_activity_expiration_date;
+            memberOrder.value.yearly_member_fee_regular = Number(res.data.memberDetail[0].regularPrice);
+            memberOrder.value.quarterly_member_fee_regular = Number(res.data.memberDetail[1].regularPrice);
+            memberOrder.value.monthly_member_fee_regular = Number(res.data.memberDetail[2].regularPrice);
+            proxy.$mainStore.setAllLoading(false);
+        } catch (err) {
+            console.error('请求失败', err)
+            proxy.$mainStore.setAllLoading(false);
+        }
+
+        
     }
 
     const tipsForLogin = (code,msg) => {
@@ -540,27 +523,21 @@
             <n-form-item v-if="memberOrder.grace_period" label="优惠价格截止日期" path="expiry_date">
                 <n-date-picker style="width:100%" v-model:formatted-value="memberOrder.expiry_date" type="datetime" value-format="yyyy-MM-dd HH:mm:ss"/>
             </n-form-item>
-            <n-form-item v-if="memberOrder.grace_period" label="优惠前的年度会员定价" path="yearly_member_fee_regular">
+            <n-form-item v-if="memberOrder.grace_period" label="优惠前的年度会员定价（元）" path="yearly_member_fee_regular">
                 <n-input-number style="width:100%" v-model:value="memberOrder.yearly_member_fee_regular" clearable min="1"/>
             </n-form-item>
-            <n-form-item v-if="memberOrder.grace_period" label="优惠前的季度会员定价" path="quarterly_member_fee_regular">
+            <n-form-item v-if="memberOrder.grace_period" label="优惠前的季度会员定价（元）" path="quarterly_member_fee_regular">
                 <n-input-number style="width:100%" v-model:value="memberOrder.quarterly_member_fee_regular" clearable min="1"/>
             </n-form-item>
-            <n-form-item v-if="memberOrder.grace_period" label="优惠前的月度会员定价" path="monthly_member_fee_regular">
+            <n-form-item v-if="memberOrder.grace_period" label="优惠前的月度会员定价（元）" path="monthly_member_fee_regular">
                 <n-input-number style="width:100%" v-model:value="memberOrder.monthly_member_fee_regular" clearable min="1"/>
             </n-form-item>
         </n-form>
     </n-flex>
-    <n-flex justify="center" style="margin-top:30px" v-if="current === 3">
-        <n-button type="primary" @click="generateConfig">生成配置</n-button>
-    </n-flex>
-    <n-flex justify="center" style="margin-top:30px" v-if="current === 3">
-        <pre style="width:560px;height:auto;background:#eee;padding:20px;">{{ JSON.stringify(jsonData, null, 2) }}</pre>
-    </n-flex>
     <n-flex justify="center" style="margin-top:30px">
         <n-button type="primary" @click="handlePreClick" v-if="current === 2 || current === 3" style="margin:0 30px">上一步</n-button>
         <n-button type="primary" @click="handleNextClick" v-if="current === 1 || current === 2" style="margin:0 30px">下一步</n-button>
-        <n-button type="primary" @click="submitConfig" v-if="current === 3" style="margin:0 30px">保存配置文件</n-button>
+        <n-button type="primary" @click="generateConfig" v-if="current === 3" style="margin:0 30px">生成配置文件并保存</n-button>
     </n-flex>
 </template>
 

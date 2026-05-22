@@ -50,7 +50,7 @@
                     localStorage.setItem("Login","True");
                     localStorage.setItem("username",response.data.username);
                     localStorage.setItem("id",response.data.id);
-                    localStorage.setItem("token",response.data.token);
+                    localStorage.setItem("RoleBot-Admin-Token",response.data.token);
                     router.push("/");
                 }else{
                     tipsForLogin(response.msg)
