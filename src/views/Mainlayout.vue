@@ -2,8 +2,11 @@
 //global import
 
 import { h, onMounted, ref, watch, computed, getCurrentInstance } from "vue";
-import { RouterLink,useRoute } from "vue-router";
+import { RouterLink,useRoute,useRouter } from "vue-router";
 const route = useRoute();
+const router = useRouter();
+import { useAxios } from '../services/axios.js'
+const axiosService = useAxios();
 import { 
     NFlex,
     NLayout,
@@ -55,16 +58,55 @@ const menuOptions = ref([
         key: "login-owner",
         icon: renderIcon(Me),
         children: [
+            // {
+            //     label: () => h(RouterLink, {to:{name:"Change",params:{}}},{default:()=>'Change Password'}),key:"change",icon:renderIcon(ElectronicDoorLock)
+            // },
             {
-                label: () => h(RouterLink, {to:{name:"Change",params:{}}},{default:()=>'Change Password'}),key:"change",icon:renderIcon(ElectronicDoorLock)
-            },
-            {
-                label: () => h(RouterLink, {to:{name:"Logout",params:{}}},{default:()=>'Logout'}),key:"logout",icon:renderIcon(Logout)
+                label:"Logout",
+                key:"logout",
+                icon:renderIcon(Logout)
             }
             
         ]
     }
 ])
+
+// 登出
+const selectMenu = async (key) => {
+    if(key == 'logout'){
+        // 打开加载中loading
+        proxy.$mainStore.setAllLoading(true);
+        await axiosService.post('admin-logout',{})
+        .then(response => {
+            if(response.code == 0){
+                localStorage.clear();
+                router.push("/login");
+            }else{
+                tipsForLogin(response.code,response.message)
+            }
+            proxy.$mainStore.setAllLoading(false);
+        })
+    }
+}
+
+const tipsForLogin = (code,msg) => {
+    if(code == 401){
+    Swal.fire({
+        icon: "error",
+        title:"Token is missing or invalid!",
+        confirmButtonText: "重新登录",
+    }).then(() => {
+        localStorage.clear();
+        router.push('/login')
+    });;
+    }else{
+    Swal.fire({
+        icon: "error",
+        title:"提示",
+        text:msg,
+    });
+    }
+};
 
 //global function
 const adjustMargins = () => {
@@ -99,6 +141,7 @@ watch(route, () => {
                     v-model:value="activeKey"
                     mode="horizontal"
                     :options="menuOptions"
+                    @update:value="selectMenu"
                     responsive
                 />
 

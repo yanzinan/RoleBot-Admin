@@ -32,6 +32,7 @@ const apiUrls = {
   "other-article-upload":"/api/v1/other/article/upload",
   "agent-save":"/api/v1/agent/save",
   "member-config-save":"/api/v1/member/config/save",
+  "admin-logout":"/api/v1/admin/logout",
 };
 
 export function useAxios() {
