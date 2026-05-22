@@ -53,7 +53,7 @@
                     localStorage.setItem("RoleBot-Admin-Token",response.data.token);
                     router.push("/");
                 }else{
-                    tipsForLogin(response.msg)
+                    tipsForLogin(response.message)
                 }
                 proxy.$mainStore.setAllLoading(false);
             })
