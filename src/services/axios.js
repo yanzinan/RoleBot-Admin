@@ -3,8 +3,12 @@ import swal from 'sweetalert';
 import ZRouter from './router'
 
 // 假设这是你的基础 URL
-// const baseUrl = 'https://c110-114-93-118-179.ngrok-free.app'; 
-const baseUrl = '/api';
+// 封装请求地址
+const isDev = import.meta.env.DEV
+// 本地用代理前缀，生产用完整域名
+// const baseUrl = isDev ? '/api' : 'http://www.kaoiki.com:8080'
+const baseUrl = 'http://www.kaoiki.com:8080'
+
 
 // 预定义的标记与 API 地址字典
 const apiUrls = {

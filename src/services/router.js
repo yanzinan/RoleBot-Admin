@@ -52,8 +52,10 @@ const routes = [
     }
 ];
 
+const isDev = import.meta.env.DEV
+const routerBase = isDev ? '/' : '/rolebot/console/'
 const router = createRouter({
-    history:createWebHashHistory(),
+    history:createWebHashHistory(routerBase),
     routes,
 });
 

@@ -74,6 +74,8 @@
         });
     };
 
+    
+
     onMounted(()=>{
        window.addEventListener("resize", adjustMargins)
        adjustMargins()

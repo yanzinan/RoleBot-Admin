@@ -157,16 +157,29 @@
             let rtcAvatarUrl = item.avatar
             rtcAvatarUrl = rtcAvatarUrl.replace("avatar_background","rtc_avatar_background")
             rtcAvatarUrl = rtcAvatarUrl.replace(/\.(jpg|jpeg|png|webp|bmp|svg|tiff)$/i, '.gif')
-            let rtcAvatarFileName = rtcAvatarUrl.split('/').pop()
-            console.log(rtcAvatarUrl,rtcAvatarFileName)
-            urlToFile(rtcAvatarUrl,rtcAvatarFileName).then(file => {
-              rtcAvatarList.value = [];
-              rtcAvatarList.value.push({
-                file:file,
-                name: rtcAvatarFileName,
-                status:"pending"
-              })
+            // 判断服务器rtc头像在不在
+            fetch(rtcAvatarUrl, { method: 'HEAD' }) // 只获取响应头，节省流量
+            .then(response => {
+                if (response.ok) {
+                    let rtcAvatarFileName = rtcAvatarUrl.split('/').pop()
+                    urlToFile(rtcAvatarUrl,rtcAvatarFileName).then(file => {
+                      rtcAvatarList.value = [];
+                      rtcAvatarList.value.push({
+                        file:file,
+                        name: rtcAvatarFileName,
+                        status:"pending"
+                      })
+                    })
+                } else {
+                    rtcAvatarList.value = [];
+                }
             })
+            .catch(error => {
+                // 网络错误或被跨域策略阻止
+                console.error('检查失败(可能跨域或网络问题):', error);
+                return false;
+            });
+            
             // 聊天背景
             let backgroundUrl = item.background
             let backgroundFileName = item.background.split('/').pop()
@@ -607,12 +620,7 @@
       }
       // 判断rtc头像是否为空
       if(rtcAvatarList.value.length == 0){
-        dialog.warning({
-            title: '提示',
-            content: '请上传RTC头像。',
-            negativeText: '关闭'
-        })
-        return false
+        formData.append('avatarRtc',null)
       }else{
         formData.append('avatarRtc',rtcAvatarList.value[0].file)
       }
@@ -778,6 +786,28 @@
         });
       }
     };
+
+    const checkFileExists = (url) => {
+      return fetch(url, { method: 'HEAD' }) // 只获取响应头，节省流量
+          .then(response => {
+              if (response.ok) {
+                  console.log(`文件存在，状态码: ${response.status}`);
+                  return true;
+              } else if (response.status === 404) {
+                  console.log(`文件不存在(404)`);
+                  return false;
+              } else {
+                  // 处理其他状态码，如500、403、502等
+                  console.log(`无法确定，状态码: ${response.status}`);
+                  return false;
+              }
+          })
+          .catch(error => {
+              // 网络错误或被跨域策略阻止
+              console.error('检查失败(可能跨域或网络问题):', error);
+              return false;
+          });
+    }
 
     //global init
     onMounted(() => {
