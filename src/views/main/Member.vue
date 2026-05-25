@@ -142,7 +142,7 @@
                 proxy.$mainStore.setAllLoading(true);
                 axiosService.post('member-config-save',{
                     gracePeriod:memberOrder.value.grace_period,
-                    expiryDate:memberOrder.value.expiry_date,
+                    expiryDate:memberOrder.value.expiry_date ? memberOrder.value.expiry_date : '',
                     yearlyMemberFeeRegular:memberOrder.value.yearly_member_fee_regular ? memberOrder.value.yearly_member_fee_regular : '',
                     quarterlyMemberFeeRegular:memberOrder.value.quarterly_member_fee_regular ? memberOrder.value.quarterly_member_fee_regular : '',
                     monthlyMemberFeeRegular:memberOrder.value.monthly_member_fee_regular ? memberOrder.value.monthly_member_fee_regular : '',
