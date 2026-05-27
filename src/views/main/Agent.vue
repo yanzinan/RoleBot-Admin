@@ -942,7 +942,7 @@
                 <n-button>点击上传</n-button>
               </n-upload>
             </n-form-item>
-            <n-form-item label="开场白" path="fileOrText">
+            <n-form-item label="开场白（open_audio）" path="fileOrText">
               <n-switch :rail-style="railStyle" v-model:value="agentModelForm.fileOrText" @update:value="openAudioTagChange">
                 <template #checked>
                   文件
@@ -963,7 +963,7 @@
               <n-button>点击上传</n-button>
             </n-upload>
             <n-input v-else style="margin-bottom:20px;" v-model:value="agentModelForm.openAudioUrl" type="text" placeholder="请输入开场白" />
-            <n-form-item label="欢迎语" path="isRoleStory">
+            <n-form-item label="欢迎语（welcom_audio）" path="isRoleStory">
               <n-switch :rail-style="railStyle" v-model:value="agentModelForm.isRoleStory">
                 <template #checked>
                   有角色故事
